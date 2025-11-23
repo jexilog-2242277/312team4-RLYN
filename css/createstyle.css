@@ -1,0 +1,267 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f7f6fc;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0E0465;
+    height: 65px;
+    padding-right: 25px;
+    color: white;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.584);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    height: 65px;
+    margin-right: 10px;
+}
+
+.header-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.header-nav span {
+    color: white;
+    font-weight: normal;
+}
+
+.header-nav .active-org {
+    border-bottom: 2px solid white;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 200px;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+    padding-left: 25px;
+    background-color: #e6e6f0;
+    outline: none;
+}
+
+/* ===================== MAIN CONTAINER ===================== */
+.main-container {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+    height: calc(100vh - 65px);
+    overflow: hidden;
+}
+
+/* ===================== SIDEBAR ===================== */
+.sidebar {
+    width: 260px;
+    background-color: #d8d8e0;
+    padding: 25px 0;
+    border-radius: 20px;
+    border: 1px solid #0E0465;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    overflow-y: auto;
+    position: sticky;
+    top: 85px;
+    align-self: flex-start;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    width: 100%;
+}
+
+.sidebar-nav li {
+    margin: 12px 0;
+}
+
+.sidebar-nav a {
+    text-decoration: none;
+    color: #2e2e2e;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 12px 25px;
+    display: block;
+    transition: 0.3s;
+    border-radius: 12px;
+}
+
+.sidebar-nav a:hover {
+    background-color: #0E0465;
+    color: #ffffff;
+}
+
+.sidebar-nav a.active {
+    background-color: #0E0465;
+    color: #ffffff;
+}
+
+/* ===================== CONTENT AREA ===================== */
+.content-area {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #0E0465;
+    border-radius: 20px;
+    padding: 25px 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    height: 100%;
+}
+
+/* ===================== PAGE TITLE ===================== */
+.page-title {
+    font-size: 20px;
+    color: #0E0465;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* ===================== FORM SECTION ===================== */
+.form-section {
+    background-color: #D7D9E6;
+    border: 1px solid #0E0465;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.form-section h3 {
+    color: #0E0465;
+    font-size: 18px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #0E0465;
+    padding-bottom: 6px;
+}
+
+/* ===================== FORM GRID ===================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group p {
+    font-size: 14px;
+    color: #0E0465;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+/* ===================== INPUTS ===================== */
+.form-input,
+textarea.form-input,
+select.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #0E0465;
+    border-radius: 8px;
+    background-color: white;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+}
+
+.form-input:focus,
+select.form-input:focus,
+textarea.form-input:focus {
+    border-color: #191c49;
+    box-shadow: 0 0 0 2px rgba(25, 28, 73, 0.2);
+}
+
+/* ===================== SDG GRID ===================== */
+.sdg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.sdg-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    border: 1px solid #0E0465;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sdg-option:hover {
+    background-color: #e4e4f0;
+}
+
+.sdg-option input {
+    accent-color: #0E0465;
+}
+
+/* ===================== BUTTONS ===================== */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 25px;
+    gap: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background-color: #0E0465;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #191c49;
+}
+
+.btn-secondary {
+    background-color: #b0b0c0;
+    color: #0E0465;
+}
+
+.btn-secondary:hover {
+    background-color: #a0a0b5;
+}
