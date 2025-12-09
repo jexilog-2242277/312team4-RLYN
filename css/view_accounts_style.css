@@ -1,0 +1,70 @@
+.main-container {
+    padding: 20px;
+}
+
+.content-area {
+    flex: 1; 
+    padding: 0 0 0 20px; 
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #0E0465; /* Strong outline */
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+    font-size: 18px;
+    color: #0E0465;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #0E0465;
+    padding-bottom: 5px;
+}
+
+.table-container {
+    overflow-x: auto; 
+}
+
+#accounts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+#accounts-table thead th {
+    background-color: #0E0465; 
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+#accounts-table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333;
+}
+
+#accounts-table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+#accounts-table tbody tr:hover {
+    background-color: #e6e6f0; 
+}
+
+.btn-action {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-edit {
+    background-color: #28a745;
+    color: white;
+}
