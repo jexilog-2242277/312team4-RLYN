@@ -7,15 +7,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalTitle = document.getElementById("modalTitle");
   const modalContent = document.getElementById("modalContent");
   const closeModal = document.getElementById("closeModal");
+  
+  // NEW: Reference to the search input
+  const searchInput = document.getElementById("searchInput");
 
   // Close modal
   closeModal.addEventListener("click", () => {
     modal.style.display = "none";
   });
 
-  // Function to fetch dashboard data
-  function loadDashboardData() {
-    fetch("../php/fetch_dashboard_data.php")
+  // Function to fetch dashboard data (MODIFIED to accept a searchTerm)
+  function loadDashboardData(searchTerm = "") {
+    const url = searchTerm.trim() 
+      ? `../php/fetch_dashboard_data.php?search=${encodeURIComponent(searchTerm.trim())}`
+      : "../php/fetch_dashboard_data.php";
+
+    fetch(url)
       .then(res => res.json())
       .then(data => {
         if (data.error) {
@@ -23,8 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        totalActivities.textContent = data.totalActivities;
-        totalDocuments.textContent = data.totalDocuments;
+        // Note: totalActivities will show the *filtered* count if searching.
+        totalActivities.textContent = data.totalActivities; 
+        // Note: totalDocuments should show the *unfiltered* count based on your PHP.
+        totalDocuments.textContent = data.totalDocuments; 
 
         documentsElem.innerHTML = "";
         recentActivities.innerHTML = "";
@@ -45,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <div><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</div>
               <div><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</div>
             </div>
+            <button class="delete-btn">Delete</button>
           `;
 
           div.addEventListener("click", () => {
@@ -76,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <div><small>${doc.activity_name ? "Activity: " + doc.activity_name : ""}</small></div>
               <div><small>${doc.org_name ? doc.org_name : ""}</small></div>
             </div>
+            <button class="delete-btn">Delete</button>
           `;
           documentsElem.appendChild(d);
         });
@@ -86,6 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial load
   loadDashboardData();
+
+  // NEW: Search Input Handler (with debouncing)
+  let searchTimeout;
+  searchInput.addEventListener("input", (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      loadDashboardData(e.target.value);
+    }, 300); // Wait 300ms after the user stops typing
+  });
 
   // Auto-refresh if a new activity was added 
   if (localStorage.getItem("activityAdded") === "true") {

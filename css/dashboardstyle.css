@@ -5,14 +5,18 @@
     font-family: Arial, sans-serif;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     background-color: #f7f6fc;
     display: flex;
     flex-direction: column;
     height: 100vh;
-     overflow: hidden;
-
+    overflow-y: auto; /* allow page scroll */
 }
+
 .header {
     display: flex;
     align-items: center;
@@ -74,6 +78,7 @@ body {
     flex: 1;
     padding: 20px;
     gap: 20px;
+    min-height: 0;
 }
 
 .sidebar {
@@ -85,8 +90,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 97%;
+    min-height: 0;
     position: sticky;
+    top: 65px;
+    height: calc(100vh - 100px);
 }
 
 .sidebar-nav ul {
@@ -109,11 +116,7 @@ body {
     border-radius: 12px;
 }
 
-.sidebar-nav a:hover {
-    background-color: #0E0465;
-    color: #ffffff;
-}
-
+.sidebar-nav a:hover,
 .sidebar-nav a.active {
     background-color: #0E0465;
     color: #ffffff;
@@ -124,6 +127,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 0; 
 }
 
 .stats-grid {
@@ -158,102 +162,81 @@ body {
     border: 1px solid #0E0465;
     border-radius: 10px;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-height: 0;
 }
 
-.activity-overview h2,
-.card h2 {
-    font-size: 14px;
-    color: #0E0465;
-    margin-bottom: 8px;
-}
 
 .activities-content {
     border: 1px solid #0E0465;
     border-radius: 8px;
     background-color: #fff;
     padding: 8px;
-    min-height: 160px; 
+    
+    height: 400px;          
+    overflow-y: auto;       
+    padding-right: 10px;
 }
 
-.activity-two-col {
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-  margin: 3px 0;
-  width: 100%;
-}
-
-.activity-two-col div {
-  width: 50%;          
-  white-space: nowrap; 
-}
-
-#activities > div {
-  background: #fff;
-  border-bottom: 1px solid #0E0465;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: 0.6s ease;
-}
-
-#activities > div:hover {
-  background: #EFEFFF;
-}
 
 .documents-body {
     border: 1px solid #0E0465;
     border-radius: 8px;
-    background-color: #fff; 
+    background-color: #fff;
     padding: 8px;
-    min-height: 160px; 
-}
 
-.doc-item {
-  background: #fff;
-  border-bottom: 1px solid #0E0465;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: 0.4s ease;
-  font-size: 15px;
-}
+    height: 400px;          
+    overflow-y: auto;       
+    padding-right: 10px;
 
-.doc-item:hover {
-  background: #EFEFFF;
+    flex: 1 1 auto;     
+    min-height: 0;        
 }
 
 
-.documents-body .activity-two-col {
-  display: flex;
-  justify-content: space-between;
-  margin: 4px 0;
-  width: 100%;
+.activity-two-col, .documents-body .activity-two-col {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    width: 100%;
 }
 
-.documents-body .activity-two-col div {
-  width: 50%;
-  white-space: nowrap;
+.activity-two-col div, .documents-body .activity-two-col div {
+    width: 50%;
+    white-space: nowrap;
 }
 
-.activities-content,
-.documents-content {
-    max-height: 400px;     
-    overflow-y: auto;
-    padding-right: 10px;   
+#activities > div, .doc-item {
+    background: #fff;
+    border-bottom: 1px solid #0E0465;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: 0.4s ease;
+    font-size: 15px;
 }
 
-.dashboard-main {
-    overflow-y: auto;
+#activities > div:hover, .doc-item:hover {
+    background: #EFEFFF;
 }
 
-.dashboard-container {
-    height: calc(100vh - 200px); 
-    overflow-y: auto;
+
+.delete-btn {
+    margin-top: 10px;
+    align-self: flex-end;
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-body {
-    overflow-y: auto !important;
+.delete-btn:hover {
+    background-color: #e74c3c;
 }
