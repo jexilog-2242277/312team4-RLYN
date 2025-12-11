@@ -30,6 +30,7 @@ if (!isset($_SESSION['user_id'])) {
         <ul>
           <li><a href="dashboard.php">Dashboard</a></li>
           <li><a href="create.php" class="active">Create Project</a></li>
+          <li><a href="view_accounts.php">View Accounts</a></li>
           <li><a href="../php/logout.php">Logout</a></li>
         </ul>
       </nav>
