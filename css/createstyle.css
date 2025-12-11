@@ -96,6 +96,28 @@ body {
     align-self: flex-start;
 }
 
+.file-overlay-wrapper {
+    position: relative; /* Essential: creates a reference point for the absolute input */
+    overflow: hidden;
+    display: inline-block; /* Allows the wrapper to size to the button */
+}
+
+.file-overlay-wrapper input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    
+    /* The key to making it work: invisible but functional */
+    opacity: 0; 
+    cursor: pointer;
+    
+    /* Ensure the input is large enough to completely cover the button */
+    height: 100%;
+    width: 100%;
+}
+
 .sidebar-nav ul {
     list-style: none;
     width: 100%;
