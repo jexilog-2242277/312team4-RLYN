@@ -1,10 +1,10 @@
 <?php
 // config/db.php
 $host = "localhost";
-$port = "2048";
-$dbname = "312team4-RLYN-mid";
+$port = "5432";
+$dbname = "312team-RLYN-mid";
 $user = "postgres";
-$password = "admin";
+$password = "123";
 
 $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
 
