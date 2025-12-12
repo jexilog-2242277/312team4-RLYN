@@ -64,13 +64,19 @@ router.post('/create', adminOnly, async (req, res) => {
             "INSERT INTO users (name, email, password, role, org_id) VALUES ($1, $2, $3, $4, $5)",
             [name, email, password, role, org_id]
         );
-
         res.redirect('/admin/users');
     } catch (err) {
         console.error(err);
+
+        if (err.code === '23505') {
+            // Email already exists
+            return res.send("Error: Email already exists");
+        }
+
         res.send("Error creating user");
     }
 });
+
 
 // ================= SHOW EDIT FORM =================
 router.get('/edit/:id', adminOnly, async (req, res) => {
