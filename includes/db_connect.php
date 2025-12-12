@@ -2,7 +2,7 @@
 // config/db.php
 $host = "localhost";
 $port = "5432";
-$dbname = "312team-RLYN-mid";
+$dbname = "312team4-RLYN";
 $user = "postgres";
 $password = "123";
 
