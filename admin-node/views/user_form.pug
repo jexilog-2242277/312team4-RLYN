@@ -50,7 +50,6 @@ html(lang="en")
               .form-group
                 p Role
                 select.form-input#role(name="role" required)
-                  option(value="admin" selected=user && user.role === 'admin') Admin
                   option(value="student" selected=user && user.role === 'student') Student
                   option(value="adviser" selected=user && user.role === 'adviser') Adviser
                   option(value="osas" selected=user && user.role === 'osas') OSAs
