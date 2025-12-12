@@ -16,12 +16,12 @@ if (!isset($_SESSION['user_id'])) {
   <style>
     /* * IMPORTANT: This CSS ensures only the custom button is visible 
      * while the actual file input handles the click.
-     * These rules should be in '../css/createstyle.css' 
      */
     .file-input-container {
         display: flex;
         align-items: center;
         gap: 10px;
+        margin-bottom: 20px;
     }
     .file-overlay-wrapper {
         position: relative; /* Base for absolute positioning */
@@ -29,7 +29,7 @@ if (!isset($_SESSION['user_id'])) {
         display: inline-block; 
         
         /* Ensure it inherits the button's size for perfect coverage */
-        height: 40px; /* Adjust based on your actual button height */
+        height: 40px; 
         line-height: 40px;
     }
 
@@ -37,31 +37,55 @@ if (!isset($_SESSION['user_id'])) {
         position: absolute;
         top: 0;
         left: 0;
-        
-        /* The key properties */
-        opacity: 0;       /* Makes it invisible */
         cursor: pointer;
-        
-        /* Ensure it covers the entire button area */
-        height: 100%;
+        opacity: 0; /* Make the input invisible */
         width: 100%;
-        
-        /* This is crucial to hide the default text/button of the file input */
-        font-size: 100px; 
+        height: 100%;
     }
-    
-    .status-message {
-        margin-top: 15px;
+    /* Add basic styling for form input to match existing style */
+    .form-input {
+        width: 100%;
         padding: 10px;
+        border: 1px solid #ccc;
         border-radius: 5px;
-        font-weight: bold;
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
     }
-    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .form-group p {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .btn-primary {
+        background-color: #007bff; /* Example primary color */
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .success {
+        color: green;
+    }
+    .error {
+        color: red;
+    }
   </style>
 </head>
 <body>
-  
+  <header class="header">
+    <div class="header-nav">
+      <?php include '../includes/header.php'; ?>
+    </div>
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Search">
+    </div>
+  </header>
+
   <div class="main-container">
     <aside class="sidebar">
       <nav class="sidebar-nav">
@@ -76,60 +100,54 @@ if (!isset($_SESSION['user_id'])) {
     </aside>
 
     <main class="content-area">
-      <h1 class="page-title">Upload Documents</h1>
-      
-      <form id="upload-form" action="../php/upload_logic.php" method="POST" enctype="multipart/form-data">
-        <div class="form-section">
-          <h3>File Upload</h3>
-          
-          <div class="form-group file-upload-group">
-            <p>Select File to Upload</p>
-            <div class="file-input-container">
-                
-                <div class="file-overlay-wrapper">
-                    
-                    <button 
-                        type="button" 
-                        class="btn btn-primary upload-button"
-                    >
-                        Choose File
-                    </button>
-                    
-                    <input 
-                        type="file" 
-                        id="document-file" 
-                        name="document" 
-                        onchange="handleFileSelect(this)" 
-                        required
-                    >
-                </div>
-                
-                <span id="file-name-display">No file selected</span>
-            </div>
-          </div>
-        </div>
-        
-        <input type="hidden" name="activity_id" value="1"> 
-      </form>
+      <h1 class="page-title">Upload New Activity Document</h1>
+      <div id="status-message" style="display: none; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid;"></div>
 
-      <div id="status-message" class="status-message" style="display: none;"></div>
+      <form id="uploadForm" action="../php/upload_logic.php" method="POST" enctype="multipart/form-data">
+        
+        <section class="form-section">
+            <h3>Document Details</h3>
+
+            <div class="form-group">
+                <p>Activity Name for this Document</p>
+                <input type="text" name="new_activity_name" class="form-input" placeholder="e.g., Q3 Financial Report Preparation" required>
+            </div>
+
+            <div class="form-group">
+                <p>Select Document File</p>
+                <div class="file-input-container">
+                    <div class="file-overlay-wrapper">
+                        <button type="button" class="btn btn-secondary">Choose File</button>
+                        <input type="file" name="document" id="fileInput" required onchange="updateFileNameDisplay(this)">
+                    </div>
+                    <span id="fileNameDisplay">No file selected</span>
+                </div>
+            </div>
+
+            </section>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Upload Document</button>
+        </div>
+      </form>
     </main>
   </div>
 
   <script>
-    // Function to handle file selection and immediate form submission
-    function handleFileSelect(input) {
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const form = document.getElementById('upload-form');
-        
-        if (input.files && input.files.length > 0) {
-            fileNameDisplay.textContent = 'Uploading: ' + input.files[0].name + '...';
-            fileNameDisplay.style.color = 'orange';
+    // Function to show the selected file name and enable form submission
+    function updateFileNameDisplay(input) {
+        const form = document.getElementById('uploadForm');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const submitButton = form.querySelector('button[type="submit"]');
 
-            // Submit the form immediately
-            form.submit(); 
+        if (input.files && input.files.length > 0) {
+            fileNameDisplay.textContent = 'Selected: ' + input.files[0].name;
+            fileNameDisplay.style.color = 'green';
+            submitButton.disabled = false; // Enable submit button once file is chosen
         } else {
             fileNameDisplay.textContent = 'No file selected';
+            fileNameDisplay.style.color = 'red';
+            submitButton.disabled = true; // Disable if no file
         }
     }
 
@@ -140,6 +158,9 @@ if (!isset($_SESSION['user_id'])) {
         const message = urlParams.get('message');
         const statusMessageDiv = document.getElementById('status-message');
         
+        // Initial state: Disable submit button until a file is selected
+        document.getElementById('uploadForm').querySelector('button[type="submit"]').disabled = true;
+
         if (status && message) {
             statusMessageDiv.style.display = 'block';
             statusMessageDiv.textContent = decodeURIComponent(message);

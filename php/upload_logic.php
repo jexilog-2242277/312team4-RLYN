@@ -22,36 +22,72 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['org_id'])) {
 
 $userId = $_SESSION['user_id'];
 $orgId = $_SESSION['org_id'];
-$activityId = (int)($_POST['activity_id'] ?? 1); 
+$newActivityName = trim($_POST['new_activity_name'] ?? ''); 
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectWithStatus("Invalid request method.");
 }
 
-// 1. Check/Create Upload Directory
+// --- NEW VALIDATION: Ensure Activity Name is provided ---
+if (empty($newActivityName)) {
+    redirectWithStatus("ERROR: You must provide a name for the new Activity related to this document.");
+}
+
+
+// 1. Insert New Activity and get ID
+$insertActivityQuery = "
+    INSERT INTO activities (org_id, created_by, name, description, academic_year, semester, date_started, date_ended, sdg_relation)
+    VALUES ($1, $2, $3, $4, NULL, NULL, CURRENT_DATE, CURRENT_DATE, 'Document Upload - No SDG Specified')
+    RETURNING activity_id;
+";
+
+// We set default values for required columns:
+// Description is set to the name, Academic Year/Semester/Dates are set to NULL/CURRENT_DATE for simplicity.
+$activityDescription = "Document Upload for: " . $newActivityName;
+
+$activityResult = pg_query_params($conn, $insertActivityQuery, [
+    $orgId,
+    $userId,
+    $newActivityName,
+    $activityDescription,
+]);
+
+if ($activityResult && pg_num_rows($activityResult) > 0) {
+    // Successfully created activity. Get the new ID.
+    $activityRow = pg_fetch_assoc($activityResult);
+    $activityId = $activityRow['activity_id'];
+} else {
+    $dbError = pg_last_error($conn);
+    pg_close($conn);
+    redirectWithStatus("DB ERROR: Failed to create new Activity record. Detail: " . $dbError);
+}
+
+
+// 2. File and Directory Checks
+// Check/Create Upload Directory
+$uploadDir = '../uploads/documents/'; 
 if (!is_dir($uploadDir)) {
-    // Attempt to create the directory with broad permissions (0777)
     if (!mkdir($uploadDir, 0777, true)) {
+        pg_close($conn);
         redirectWithStatus("FILE ERROR: Failed to create upload directory. Check file system permissions for: " . $uploadDir);
     }
 }
+if (!is_writable($uploadDir)) {
+    pg_close($conn);
+    redirectWithStatus("PERMISSION ERROR: The directory " . $uploadDir . " is not writable by the web server.");
+}
 
-// Handle file upload
+
+// 3. Handle file upload and sequential naming
 if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
     
-    // Check if file is actually writable
-    if (!is_writable($uploadDir)) {
-        redirectWithStatus("PERMISSION ERROR: The directory " . $uploadDir . " is not writable by the web server.");
-    }
-
     $fileTmpPath = $_FILES['document']['tmp_name'];
     $originalFileName = basename($_FILES['document']['name']);
-    $fileSize = $_FILES['document']['size'];
     $fileType = $_FILES['document']['type'];
     $fileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
-
-    // --- 2. Find the next sequential number (Hardened SQL) ---
-    // We try to find the max number using a reliable pattern match for files like 'doc%.pdf'
+    
+    // Find the next sequential number (Hardened SQL)
     $maxNumQuery = "
         SELECT COALESCE(
             MAX(
@@ -72,49 +108,49 @@ if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK
         $lastNumber = (int)($row['max_num'] ?? 0); 
         $nextDocNumber = $lastNumber + 1;
     } else {
-        // Fallback or detailed error message if the query fails
         $dbError = pg_last_error($conn);
+        pg_close($conn);
         redirectWithStatus("SQL ERROR: Failed to determine next sequential document number. Detail: " . $dbError);
     }
 
-    // --- 3. Construct the new file name and paths ---
+    // Construct the new file name and paths
     $newFileName = 'doc' . $nextDocNumber . '.' . $fileExtension;
     $destPath = $uploadDir . $newFileName;
     
-    // Document title for the database (user-facing)
-    $documentTitle = $fileBaseName;
+    // Use the sequential file name for the database document_name
+    $documentTitle = $newFileName;
 
-    // --- 4. Move the uploaded file ---
+
+    // 4. Move the uploaded file
     if (move_uploaded_file($fileTmpPath, $destPath)) {
         
-        // --- 5. Database Insertion (Checked against all FKs) ---
-       // --- 5. Database Insertion ---
-        $insertQuery = "
+        // 5. Database Insertion (Document record)
+        $insertDocumentQuery = "
             INSERT INTO documents (
                 org_id, 
                 activity_id, 
                 document_name, 
-                document_file_path,  -- <-- ADD THIS COLUMN NAME
+                document_file_path,  
                 document_type, 
                 uploaded_by
             )
             VALUES ($1, $2, $3, $4, $5, $6);
         ";
         
-        $result = pg_query_params($conn, $insertQuery, [
+        $documentResult = pg_query_params($conn, $insertDocumentQuery, [
             $orgId,
-            $activityId,
+            $activityId, // Use the ID from the newly created activity
             $documentTitle, 
-            $newFileName,   // <-- This is the value for document_file_path
+            $newFileName,   
             $fileType,
             $userId
         ]);
 
-        if ($result) {
+        if ($documentResult) {
             pg_close($conn);
-            redirectWithStatus("File uploaded successfully as: " . $newFileName, "success");
+            redirectWithStatus("File uploaded successfully and linked to new activity: '" . htmlspecialchars($newActivityName) . "'. File saved as: " . $newFileName, "success");
         } else {
-            // DATABASE INSERT FAILED (Likely a foreign key violation, e.g., org_id or user_id are invalid)
+            // DOCUMENT DB INSERT FAILED
             $dbError = pg_last_error($conn);
             
             // CLEANUP: Remove the file to prevent orphaned storage
@@ -122,7 +158,7 @@ if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK
                  unlink($destPath); 
             }
             pg_close($conn);
-            redirectWithStatus("DB INSERT FAILED: Metadata could not be saved. Check if logged-in user_id/org_id are valid in your database. Detail: " . $dbError);
+            redirectWithStatus("DB INSERT FAILED: Document metadata could not be saved. Detail: " . $dbError);
         }
 
     } else {
@@ -134,21 +170,26 @@ if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK
 } else {
     // Handle file upload errors
     $errorMessage = "Upload failed.";
-    if (isset($_FILES['document']['error'])) {
-        $uploadError = $_FILES['document']['error'];
-        if ($uploadError === UPLOAD_ERR_INI_SIZE || $uploadError === UPLOAD_ERR_FORM_SIZE) {
-            $errorMessage = "The file is too large to upload (check php.ini settings).";
-        } elseif ($uploadError === UPLOAD_ERR_PARTIAL) {
-            $errorMessage = "The file was only partially uploaded.";
-        } elseif ($uploadError !== UPLOAD_ERR_NO_FILE) {
-            $errorMessage = "File upload failed with error code: " . $uploadError;
-        } else {
-             // User loaded the page, no file selected. Exit silently.
-             pg_close($conn);
-             exit; 
+    $uploadError = $_FILES['document']['error'] ?? UPLOAD_ERR_NO_FILE;
+    
+    if ($uploadError !== UPLOAD_ERR_NO_FILE) {
+        switch ($uploadError) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                $errorMessage = "The file is too large to upload (check php.ini settings).";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $errorMessage = "The file was only partially uploaded.";
+                break;
+            default:
+                $errorMessage = "File upload failed with error code: " . $uploadError;
         }
+        pg_close($conn);
+        redirectWithStatus($errorMessage);
     }
+    // If UPLOAD_ERR_NO_FILE and activity name was entered, we shouldn't fail silently here.
+    // However, since we are now relying on a submission button, this case should be handled by the client-side 'required' attribute.
     pg_close($conn);
-    redirectWithStatus($errorMessage);
+    exit; 
 }
 ?>
