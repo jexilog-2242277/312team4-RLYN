@@ -1,0 +1,83 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title Admin - User Form
+    link(rel="stylesheet", href="/css/dashboardstyle.css")
+    link(rel="stylesheet", href="/css/view_accounts_style.css")
+    link(rel="stylesheet", href="/css/createstyle.css")
+
+  body
+    // HEADER
+    header.header
+      .header-nav
+        img.logo(src="/images/logo.png", alt="School Logo")
+        span.role-label #{admin.role || 'Admin'} |
+        span.admin-name #{admin.name || 'Admin'}
+
+    // MAIN LAYOUT
+    .main-container
+
+      // SIDEBAR
+      aside.sidebar
+        nav.sidebar-nav
+          ul
+            li
+              a(href="/admin/users") Users
+            li
+              a.active(href="/admin/users/create") Create User
+            li
+              a(href="/admin/logout") Logout
+
+      // CONTENT AREA
+      section.content-area
+        .page-title #{user ? 'Edit User' : 'Create User'}
+
+        .form-section
+          form(method="POST", action=formAction)
+            .form-grid
+              // NAME
+              .form-group
+                p Name
+                input.form-input#name(type="text", name="name", required, value=user ? user.name : "")
+
+              // EMAIL
+              .form-group
+                p Email
+                input.form-input#email(type="email", name="email", required, value=user ? user.email : "")
+
+              // ROLE
+              .form-group
+                p Role
+                select.form-input#role(name="role" required)
+                  option(value="admin" selected=user && user.role === 'admin') Admin
+                  option(value="student" selected=user && user.role === 'student') Student
+                  option(value="adviser" selected=user && user.role === 'adviser') Adviser
+                  option(value="osas" selected=user && user.role === 'osas') OSAs
+
+              // ORGANIZATION
+              .form-group
+                p Organization
+                select.form-input#org_id(name="org_id" required)
+                  option(value="" disabled selected) -- Select Organization --
+                  each org in orgs || []
+                    option(
+                      value=org.org_id
+                      selected=user && user.org_id === org.org_id
+                    ) #{org.org_id} - #{org.name}
+
+              // PASSWORD
+              .form-group
+                p Password
+                if user
+                  input.form-input#password(
+                    type="password", 
+                    name="password", 
+                    placeholder="Leave blank to keep current password"
+                  )
+                else
+                  input.form-input#password(type="password", name="password", required)
+
+            // FORM ACTIONS
+            .form-actions
+              button.btn.btn-primary(type="submit") Submit

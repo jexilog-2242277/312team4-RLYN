@@ -1,0 +1,152 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title System Admin Dashboard
+    link(rel="stylesheet", href="/css/dashboardstyle.css")
+    link(rel="stylesheet", href="/css/view_accounts_style.css")
+    style.
+      .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
+      .modal-content { background:#fff; padding:30px; border-radius:8px; width:400px; box-shadow:0 5px 15px rgba(0,0,0,0.3); }
+      .modal h3 { margin-top:0; }
+      .modal label { display:block; margin-top:15px; font-weight:bold; }
+      .modal input, .modal select { width:100%; padding:8px; margin-top:5px; border-radius:4px; border:1px solid #ccc; }
+      .modal button { margin-top:20px; padding:10px 15px; border:none; border-radius:4px; cursor:pointer; }
+      .modal button.submit-btn { background-color:#4CAF50; color:#fff; }
+      .modal button.cancel-btn { background-color:#f44336; color:#fff; margin-left:10px; }
+      .close { float:right; cursor:pointer; font-size:20px; }
+
+  body
+    // HEADER
+    header.header
+      .header-nav
+        img.logo(src="/images/logo.png", alt="School Logo")
+        span.role-label #{admin.role || 'Admin'} |
+        span.admin-name #{admin.name || 'Admin'}
+      .search-container
+        form(method="GET", action="/admin/users")
+          input#searchInput.search-input(type="text", name="q", placeholder="Search Accounts...", value=search)
+
+    // MAIN LAYOUT
+    .main-container
+      aside.sidebar
+        nav.sidebar-nav
+          ul
+            li
+              a.active(href="/admin/users") Users
+            li
+              a(href="/admin/users/create") Create User
+            li
+              a(href="/admin/logout") Logout
+
+      section.content-area
+        .card
+          h2 Registered Accounts
+          .table-container
+            table#accounts-table
+              thead
+                tr
+                  th Name
+                  th Email
+                  th Role
+                  th Organization
+                  th Actions
+              tbody
+                each user in users
+                  - const userOrg = orgs.find(o => o.org_id === user.org_id)
+                  tr
+                    td #{user.name}
+                    td #{user.email}
+                    td #{user.role}
+                    td #{userOrg ? `${userOrg.org_id} - ${userOrg.name}` : 'N/A'}
+                    td
+                      button.btn-edit(
+                        type="button",
+                        data-id=user.user_id,
+                        data-name=user.name,
+                        data-email=user.email,
+                        data-role=user.role,
+                        data-org=user.org_id
+                      ) Edit
+                      button.btn-delete(type="button", data-id=user.user_id) Delete
+
+    // EDIT MODAL
+    .modal#editModal
+      .modal-content
+        span.close#editClose &times;
+        h3 Edit User
+        form#editForm(method="POST")
+          input(type="hidden", name="user_id", id="editUserId")
+          label Name:
+          input(type="text", name="name", id="editName", required)
+          label Email:
+          input(type="email", name="email", id="editEmail", required)
+          label Password:
+          input(type="password", name="password", id="editPassword", placeholder="Leave blank to keep current password")
+          label Role:
+          select(name="role", id="editRole", required)
+            option(value="student") Student
+            option(value="adviser") Adviser
+            option(value="osas") OSAS
+            option(value="admin") Admin
+          label Organization:
+          select(name="org_id", id="editOrg", required)
+            option(value="" disabled selected) -- Select Organization --
+            each org in orgs || []
+              option(value=org.org_id) #{org.org_id} - #{org.name}
+          .form-actions
+            button.submit-btn(type="submit") Save Changes
+            button.cancel-btn(type="button" id="cancelEdit") Cancel
+
+    // DELETE MODAL
+    .modal#deleteModal
+      .modal-content
+        span.close#deleteClose &times;
+        h3 Confirm Delete
+        p Are you sure you want to delete this user?
+        form#deleteForm(method="POST")
+          button(type="submit") Yes, Delete
+          button(type="button" id="cancelDelete") Cancel
+
+    // SCRIPTS
+    script.
+      const editModal = document.getElementById('editModal');
+      const editClose = document.getElementById('editClose');
+      const cancelEdit = document.getElementById('cancelEdit');
+      const editForm = document.getElementById('editForm');
+
+      document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          editModal.style.display = 'flex';
+          document.getElementById('editUserId').value = btn.dataset.id;
+          document.getElementById('editName').value = btn.dataset.name;
+          document.getElementById('editEmail').value = btn.dataset.email;
+          document.getElementById('editRole').value = btn.dataset.role;
+          document.getElementById('editPassword').value = '';
+          document.getElementById('editOrg').value = btn.dataset.org;
+          editForm.action = `/admin/users/edit/${btn.dataset.id}`;
+        });
+      });
+
+      editClose.onclick = () => editModal.style.display = 'none';
+      cancelEdit.onclick = () => editModal.style.display = 'none';
+
+      const deleteModal = document.getElementById('deleteModal');
+      const deleteClose = document.getElementById('deleteClose');
+      const deleteForm = document.getElementById('deleteForm');
+      const cancelDelete = document.getElementById('cancelDelete');
+
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          deleteModal.style.display = 'flex';
+          deleteForm.action = `/admin/users/delete/${btn.dataset.id}`;
+        });
+      });
+
+      deleteClose.onclick = () => deleteModal.style.display = 'none';
+      cancelDelete.onclick = () => deleteModal.style.display = 'none';
+
+      window.onclick = function(event) {
+        if (event.target === editModal) editModal.style.display = 'none';
+        if (event.target === deleteModal) deleteModal.style.display = 'none';
+      }

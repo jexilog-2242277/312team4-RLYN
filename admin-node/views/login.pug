@@ -1,0 +1,42 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title Login | Org Repository
+    link(rel="stylesheet", href="/css/dashboardstyle.css")
+    style.
+      body {
+        display: flex; align-items: center; justify-content: center;
+        height: 100vh; background: #f0f2f5; font-family: Arial, sans-serif;
+      }
+      .login-box {
+        background: #fff; padding: 30px; border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 320px;
+      }
+      input[type=text], input[type=password] {
+        width: 100%; padding: 10px; margin: 10px 0;
+        border: 1px solid #ccc; border-radius: 5px;
+      }
+      button {
+        width: 100%; padding: 10px; background: #2563EB;
+        color: white; border: none; border-radius: 5px; cursor: pointer;
+      }
+      button:hover { background: #1e4fc5; }
+      .error { color: red; text-align: center; }
+
+  body
+    .login-box
+      h2(style="text-align:center;") Org Repository Login
+
+      form(method="POST", action="/admin/login")
+
+        label Email
+        input(type="text", name="email", required)
+
+        label Password
+        input(type="password", name="password", required)
+
+        button(type="submit") Login
+
+        if error
+          p.error #{error}
