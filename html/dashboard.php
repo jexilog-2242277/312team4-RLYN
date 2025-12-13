@@ -32,7 +32,6 @@ if (!isset($_SESSION['user_id'])) {
           <li><a href="dashboard.php" class="active">Dashboard</a></li>
           <li><a href="create.php">Create Activity</a></li>
           <li><a href="upload.php">Upload Documents</a></li>
-          <li><a href="view_accounts.php">View Accounts</a></li>
           <li><a href="../php/logout.php">Logout</a></li>
         </ul>
       </nav>
