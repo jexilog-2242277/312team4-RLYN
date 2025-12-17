@@ -33,13 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Redirect back to Node admin if redirect is provided
-            if ($redirect && $user['role'] === 'admin') {
-                // Add uid as query parameter
-                $redirectUrl = $redirect . '?uid=' . $user['user_id'];
-                header("Location: " . $redirectUrl);
-                exit;
-            }
+        
 
             // Default dashboard for non-admins or no redirect
             header("Location: ../html/dashboard.php");

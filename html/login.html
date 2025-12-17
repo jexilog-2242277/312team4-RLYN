@@ -29,7 +29,6 @@
   <div class="login-box">
     <h2 style="text-align:center;">Org Repository Login</h2>
     <form method="POST" action="../php/login.php">
-      <input type="hidden" name="redirect" value="<?php echo isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : ''; ?>">
       <label>Email</label>
       <input type="text" name="email" required>
       <label>Password</label>
