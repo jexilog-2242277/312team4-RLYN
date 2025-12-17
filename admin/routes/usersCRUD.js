@@ -120,7 +120,7 @@ router.post('/edit/:id', adminOnly, async (req, res) => {
             // Update without password
             await pool.query(
                 "UPDATE users SET name=$1, email=$2, role=$3, org_id=$4 WHERE user_id=$5",
-                [name, email, role, org_id, req.params.id]
+                [name, email, role, orgValue, req.params.id]
             );
         }
 
