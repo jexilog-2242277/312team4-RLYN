@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result && pg_num_rows($result) === 1) {
         $user = pg_fetch_assoc($result);
 
-        if ($user['role'] === 'admin' || $user['role'] === 'osas') {
+        if ($user['role'] === 'admin') {
             header("Location: ../html/login.html?error=Admins are not allowed to log in here");
             exit;
         }
