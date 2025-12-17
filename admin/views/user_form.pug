@@ -53,11 +53,13 @@ html(lang="en")
                   option(value="student" selected=user && user.role === 'student') Student
                   option(value="adviser" selected=user && user.role === 'adviser') Adviser
                   option(value="osas" selected=user && user.role === 'osas') OSAs
+                  option(value="admin" selected=user && user.role === 'admin') Admin
+
 
               // ORGANIZATION
               .form-group
                 p Organization
-                select.form-input#org_id(name="org_id" required)
+                select.form-input#org_id(name="org_id")
                   option(value="" disabled selected) -- Select Organization --
                   each org in orgs || []
                     option(

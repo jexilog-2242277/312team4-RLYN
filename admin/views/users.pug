@@ -90,7 +90,7 @@ html(lang="en")
             option(value="osas") OSAS
             option(value="admin") Admin
           label Organization:
-          select(name="org_id", id="editOrg", required)
+          select(name="org_id", id="editOrg")
             option(value="" disabled selected) -- Select Organization --
             each org in orgs || []
               option(value=org.org_id) #{org.org_id} - #{org.name}
