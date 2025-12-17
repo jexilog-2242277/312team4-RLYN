@@ -58,11 +58,12 @@ router.get('/create', adminOnly, async (req, res) => {
 // ================= CREATE USER =================
 router.post('/create', adminOnly, async (req, res) => {
     const { name, email, password, role, org_id } = req.body;
+    const orgValue = org_id || null;
 
     try {
         await pool.query(
             "INSERT INTO users (name, email, password, role, org_id) VALUES ($1, $2, $3, $4, $5)",
-            [name, email, password, role, org_id]
+            [name, email, password, role, orgValue]
         );
         res.redirect('/admin/users');
     } catch (err) {
@@ -106,13 +107,14 @@ router.get('/edit/:id', adminOnly, async (req, res) => {
 // ================= UPDATE USER =================
 router.post('/edit/:id', adminOnly, async (req, res) => {
     const { name, email, role, org_id, password } = req.body;
+    const orgValue = org_id || null;
 
     try {
         if (password && password.trim() !== "") {
             // Update with password
             await pool.query(
                 "UPDATE users SET name=$1, email=$2, role=$3, password=$4, org_id=$5 WHERE user_id=$6",
-                [name, email, role, password, org_id, req.params.id]
+                [name, email, role, password, orgValue, req.params.id]
             );
         } else {
             // Update without password
