@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Default labels
 $roleLabel = 'Guest';
-$orgLabel = 'Student Org';
+$orgLabel = 'Office of Student Affairs';
 
 if (!empty($_SESSION['role'])) {
     $roleLabel = htmlspecialchars($_SESSION['role']);
