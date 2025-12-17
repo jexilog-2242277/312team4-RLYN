@@ -51,12 +51,19 @@ if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK
     // Get the file extension
     $fileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
 
-    // --- File Renaming Logic for Uniqueness ---
-    // Use a unique ID (like current microtime or a UUID) combined with the original extension
-    // This creates a highly unique filename.
-    $uniqueId = uniqid(time(), true);
-    $newFileName = 'doc_' . $uniqueId . '.' . $fileExtension;
+    // Remove file extension from original name
+    $baseName = pathinfo($originalFileName, PATHINFO_FILENAME);
+
+    // Sanitize the base name
+    $baseName = preg_replace("/[^a-zA-Z0-9_-]/", "_", $baseName);
+
+    // Append date and time
+    $dateTimeSuffix = date("Ymd_His"); // e.g., 20251217_235959
+
+    // Construct new file name
+    $newFileName = $baseName . '_' . $dateTimeSuffix . '.' . $fileExtension;
     $destPath = $uploadDir . $newFileName;
+
 
     // Move the uploaded file from temporary location to its permanent destination
     if (move_uploaded_file($fileTmpPath, $destPath)) {

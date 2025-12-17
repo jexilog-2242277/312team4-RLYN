@@ -113,9 +113,22 @@ if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK
         redirectWithStatus("SQL ERROR: Failed to determine next sequential document number. Detail: " . $dbError);
     }
 
-    // Construct the new file name and paths
-    $newFileName = 'doc' . $nextDocNumber . '.' . $fileExtension;
+    // Remove file extension from original name
+    $baseName = pathinfo($originalFileName, PATHINFO_FILENAME);
+
+    // Sanitize the base name (remove spaces and special chars)
+    $baseName = preg_replace("/[^a-zA-Z0-9_-]/", "_", $baseName);
+
+    // Append date and time
+    $dateTimeSuffix = date("Ymd_His"); // e.g., 20251217_235959
+
+    // Construct new file name
+    $newFileName = $baseName . '_' . $dateTimeSuffix . '.' . $fileExtension;
     $destPath = $uploadDir . $newFileName;
+
+    // Use this for document_name in DB if you want to store the displayed name
+    $documentTitle = $newFileName;
+
     
     // Use the sequential file name for the database document_name
     $documentTitle = $newFileName;
