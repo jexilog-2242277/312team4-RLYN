@@ -91,7 +91,7 @@ html(lang="en")
             option(value="admin") Admin
           label Organization:
           select(name="org_id", id="editOrg")
-            option(value="" disabled selected) -- Select Organization --
+            option(value="" selected) -- None --
             each org in orgs || []
               option(value=org.org_id) #{org.org_id} - #{org.name}
           .form-actions
