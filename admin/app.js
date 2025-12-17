@@ -12,7 +12,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static('origFiles'));
 
 app.use(session({
     secret: "secret",
