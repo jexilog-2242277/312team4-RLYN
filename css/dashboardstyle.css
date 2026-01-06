@@ -28,7 +28,7 @@ body {
     box-shadow: 0 2px 7px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .header-nav {
@@ -107,20 +107,22 @@ body {
 
 .stats-grid {
     display: flex;
-    gap: 0;
+    gap: 20px;
     border: 1px solid #0E0465;
     border-radius: 15px;
     padding: 10px 20px;
     background-color: #ffffff;
     align-items: center;
     justify-content: space-between;
+    position: relative;
 }
 
 .filter {
-    flex: 0 0 350px;
+    flex: 0 0 400px;
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow: visible !important;
 }
 
 .filter-controls {
@@ -134,11 +136,12 @@ body {
     flex: 1;
     background: transparent;
     border: none;
-    padding: 6px 15px;
+    padding: 6px 10px;
     cursor: pointer;
     font-weight: bold;
     color: #0E0465;
     transition: 0.3s;
+    font-size: 13px;
 }
 
 .filter-btn.active {
@@ -148,23 +151,26 @@ body {
 
 .filter-panels {
     position: absolute;
-    top: 110%;
+    top: 40px;
     left: 0;
     width: 100%;
-    z-index: 10;
+    z-index: 999;
 }
 
 .sub-panel {
     background: #ffffff;
     padding: 12px;
     border: 1px solid #0E0465;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: none;
 }
 
 .filter-select {
     width: 100%;
     padding: 8px;
     border: 1px solid #0E0465;
+    outline: none;
+    cursor: pointer;
 }
 
 .sdg-grid {
@@ -263,4 +269,8 @@ body {
     border-left: 4px solid #0E0465;
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
+
+#modal {
+    z-index: 2000;
+}

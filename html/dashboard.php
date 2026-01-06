@@ -40,34 +40,50 @@ if (!isset($_SESSION['user_id'])) {
     <section class="content-area">
       <div class="stats-grid">
         <div class="filter">
-  <div class="filter-controls">
-    <button type="button" class="filter-btn active" id="btnAll">All</button>
-    <button type="button" class="filter-btn" id="btnYear">Year</button>
-    <button type="button" class="filter-btn" id="btnSDG">SDGs</button>
-    
-    <button type="button" class="filter-btn apply-btn" id="btnApply" style="margin-left: 20px; background-color: #28a745; color: white;">Apply</button>
-    <button type="button" class="filter-btn clear-btn" id="btnClear" style="background-color: #dc3545; color: white;">Clear</button>
-  </div>
-
-  <div class="filter-panels">
-    <div id="panelYear" class="sub-panel" style="display: none;">
-      <select id="yearSelect" class="filter-select">
-        <option value="">Choose Year</option>
-      </select>
-    </div>
-
-    <div id="panelSDG" class="sub-panel" style="display: none;">
-      <div class="sdg-grid">
-        <?php for($i = 1; $i <= 17; $i++): ?>
-          <div class="sdg-item">
-            <label for="sdg<?php echo $i; ?>"><?php echo $i; ?></label>
-            <input type="checkbox" id="sdg<?php echo $i; ?>" value="<?php echo $i; ?>">
+          <div class="filter-controls">
+            <button type="button" class="filter-btn active" id="btnAll">All</button>
+            <button type="button" class="filter-btn" id="btnOrg">Org</button>
+            <button type="button" class="filter-btn" id="btnYear">Year</button>
+            <button type="button" class="filter-btn" id="btnSDG">SDGs</button>
+            
+            <button type="button" class="filter-btn apply-btn" id="btnApply" style="margin-left: 20px; background-color: #28a745; color: white;">Apply</button>
+            <button type="button" class="filter-btn clear-btn" id="btnClear" style="background-color: #dc3545; color: white;">Clear</button>
           </div>
-        <?php endfor; ?>
-      </div>
-    </div>
-  </div>
-</div>
+
+          <div class="filter-panels">
+            <div id="panelOrg" class="sub-panel" style="display: none; margin-top: 10px;">
+              <select id="orgSelect" class="filter-select">
+                <option value="">Choose Organization</option>
+                <option value="SAMCIS">SAMCIS</option>
+                <option value="SEA">SEA</option>
+                <option value="SOM">SOM</option>
+                <option value="SONAHBS">SONAHBS</option>
+                <option value="SOL">SOL</option>
+                <option value="STELA">STELA</option>
+                <option value="University-Wide">University-Wide</option>
+              </select>
+            </div>
+
+            <div id="panelYear" class="sub-panel" style="display: none; margin-top: 10px;">
+              <select id="yearSelect" class="filter-select">
+                <option value="">Choose Year</option>
+                <option value="2024-2025">2024-2025</option>
+                <option value="2023-2024">2023-2024</option>
+              </select>
+            </div>
+
+            <div id="panelSDG" class="sub-panel" style="display: none; margin-top: 10px;">
+              <div class="sdg-grid">
+                <?php for($i = 1; $i <= 17; $i++): ?>
+                  <div class="sdg-item">
+                    <label for="sdg<?php echo $i; ?>"><?php echo $i; ?></label>
+                    <input type="checkbox" id="sdg<?php echo $i; ?>" value="<?php echo $i; ?>">
+                  </div>
+                <?php endfor; ?>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="stat-card">
           <p>Total Activities</p>
@@ -95,21 +111,17 @@ if (!isset($_SESSION['user_id'])) {
           </div>
         </div>
       </div>
-
     </section>
   </div>
 
-  <div id="modal" class="hidden"
-       style="position: fixed; top:0; left:0; width:100%; height:100%;
-              background: rgba(0,0,0,0.4); display:none; align-items:center;
-              justify-content:center;">
+  <div id="modal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 1000;">
     <div style="background:#fff; padding:20px; border-radius:10px; width:400px;">
       <h3 id="modalTitle">Activity Details</h3>
       <div id="modalContent"></div>
-      <button id="closeModal" style="margin-top:10px;">Close</button>
+      <button id="closeModal" style="margin-top:10px; padding: 5px 15px; cursor: pointer;">Close</button>
     </div>
   </div>
 
   <script src="../js/dashboard.js"></script>
 </body>
-</html>
+</html> 
