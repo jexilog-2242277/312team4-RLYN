@@ -20,12 +20,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Filter Elements
     const btnAll = document.getElementById("btnAll");
+    const btnOrg = document.getElementById("btnOrg");
     const btnYear = document.getElementById("btnYear");
     const btnSDG = document.getElementById("btnSDG");
+    
+    const panelOrg = document.getElementById("panelOrg");
     const panelYear = document.getElementById("panelYear");
     const panelSDG = document.getElementById("panelSDG");
+    
+    const orgSelect = document.getElementById("orgSelect");
     const yearSelect = document.getElementById("yearSelect");
     const sdgCheckboxes = document.querySelectorAll(".sdg-item input");
+    
+    // Action Buttons
+    const btnApply = document.getElementById("btnApply");
+    const btnClear = document.getElementById("btnClear");
 
     // --- State Management ---
     let currentFilters = {
@@ -52,50 +61,106 @@ document.addEventListener("DOMContentLoaded", () => {
     tabBtnActivities.addEventListener("click", () => switchTab('activities'));
     tabBtnDocuments.addEventListener("click", () => switchTab('documents'));
 
-    // --- Filter UI Logic ---
-    const resetFilterPanels = () => {
-        panelYear.style.display = "none";
-        panelSDG.style.display = "none";
-        [btnAll, btnYear, btnSDG].forEach(b => b.classList.remove("active"));
+    // --- ENHANCED: Minimizing / Toggle Logic ---
+
+    // Helper to hide all sub-panels
+    const hideAllPanels = () => {
+        [panelOrg, panelYear, panelSDG].forEach(p => { if(p) p.style.display = "none"; });
+        [btnAll, btnOrg, btnYear, btnSDG].forEach(b => { if(b) b.classList.remove("active"); });
     };
 
+    // "All" Button logic: Reset everything and hide panels
     btnAll.addEventListener("click", () => {
-        resetFilterPanels();
+        hideAllPanels();
         btnAll.classList.add("active");
+        
+        // Reset local selection UI
+        if(orgSelect) orgSelect.value = "";
+        if(yearSelect) yearSelect.value = "";
+        sdgCheckboxes.forEach(cb => cb.checked = false);
+        
+        // Reset filter state
         currentFilters.year = "";
         currentFilters.sdgs = [];
-        yearSelect.value = "";
-        sdgCheckboxes.forEach(cb => cb.checked = false);
+        
         loadDashboardData();
     });
 
-    btnYear.addEventListener("click", () => {
-        resetFilterPanels();
-        btnYear.classList.add("active");
-        panelYear.style.display = "block";
-    });
-
-    btnSDG.addEventListener("click", () => {
-        resetFilterPanels();
-        btnSDG.classList.add("active");
-        panelSDG.style.display = "block";
-    });
-
-    yearSelect.addEventListener("change", (e) => {
-        currentFilters.year = e.target.value;
-        loadDashboardData();
-    });
-
-    sdgCheckboxes.forEach(cb => {
-        cb.addEventListener("change", () => {
-            currentFilters.sdgs = Array.from(sdgCheckboxes)
-                .filter(i => i.checked)
-                .map(i => i.value);
-            loadDashboardData();
+    // Toggle Org Panel
+    if(btnOrg) {
+        btnOrg.addEventListener("click", () => {
+            const isVisible = panelOrg.style.display === "block";
+            hideAllPanels();
+            if (!isVisible) {
+                panelOrg.style.display = "block";
+                btnOrg.classList.add("active");
+            } else {
+                btnAll.classList.add("active");
+            }
         });
+    }
+
+    // Toggle Year Panel
+    btnYear.addEventListener("click", () => {
+        const isVisible = panelYear.style.display === "block";
+        hideAllPanels();
+        if (!isVisible) {
+            panelYear.style.display = "block";
+            btnYear.classList.add("active");
+        } else {
+            btnAll.classList.add("active");
+        }
     });
 
-    // --- Data Fetching ---
+    // Toggle SDG Panel
+    btnSDG.addEventListener("click", () => {
+        const isVisible = panelSDG.style.display === "block";
+        hideAllPanels();
+        if (!isVisible) {
+            panelSDG.style.display = "block";
+            btnSDG.classList.add("active");
+        } else {
+            btnAll.classList.add("active");
+        }
+    });
+
+    // --- Apply and Clear Logic ---
+
+    btnApply.addEventListener("click", () => {
+        // Capture choices
+        currentFilters.year = yearSelect.value;
+        currentFilters.sdgs = Array.from(sdgCheckboxes)
+            .filter(i => i.checked)
+            .map(i => i.value);
+        
+        // Fetch new data
+        loadDashboardData();
+        
+        // MINIMIZE: Hide panels after applying
+        hideAllPanels();
+        btnAll.classList.add("active");
+    });
+
+    btnClear.addEventListener("click", () => {
+        // Reset UI selections
+        if(orgSelect) orgSelect.value = "";
+        if(yearSelect) yearSelect.value = "";
+        sdgCheckboxes.forEach(cb => cb.checked = false);
+        
+        // Reset state
+        currentFilters.year = "";
+        currentFilters.sdgs = [];
+        
+        // Fetch data (shows everything)
+        loadDashboardData();
+        
+        // MINIMIZE: Hide panels after clearing
+        hideAllPanels();
+        btnAll.classList.add("active");
+    });
+
+    // --- Data Fetching & Rendering (Preserved Logic) ---
+
     function loadDashboardData() {
         const params = new URLSearchParams();
         if (currentFilters.search) params.append("search", currentFilters.search);
@@ -106,32 +171,20 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.error) return console.error("API Error:", data.error);
-                
                 totalActivities.textContent = data.totalActivities || 0;
                 totalDocuments.textContent = data.totalDocuments || 0;
-
                 renderActivities(data.activities || []);
                 renderDocuments(data.documents || []);
             })
             .catch(err => console.error("Fetch error:", err));
     }
 
-    // --- Rendering Helpers ---
     function renderActivities(activities) {
         activitiesElem.innerHTML = activities.length ? "" : "<p style='padding:15px;'>No activities found.</p>";
         activities.forEach(act => {
             const div = document.createElement("div");
             div.className = "activity-item";
-            
-            // Set styles to ensure labels stay as they were, but button goes to far right
-            div.style = `
-                padding: 10px; 
-                border-bottom: 1px solid #ccc; 
-                cursor: pointer; 
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center;
-            `;
+            div.style = "padding: 10px; border-bottom: 1px solid #ccc; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
             
             div.innerHTML = `
                 <div style="flex-grow: 1;">
@@ -144,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</div>
                     </div>
                 </div>
-                <div style="margin-left: 20px;">
+                <div style="margin-left: 20px; display: flex; gap: 5px;">
                     <button class="return-btn">Return</button>
                     <button class="delete-btn" data-id="${act.activity_id}">Delete</button>
                 </div>
@@ -160,8 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p><strong>Organization:</strong> ${act.org_name || "N/A"}</p>
                     <p><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</p>
                     <p><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</p>
-                    <p><strong>Date:</strong> ${act.date_started || ""} to ${act.date_ended || ""}</p>
-                    <p><strong>Description:</strong><br>${act.description || "No description provided."}</p>
+                    <p><strong>Description:</strong><br>${act.description || "No description."}</p>
                 `);
             });
             activitiesElem.appendChild(div);
@@ -180,11 +232,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div style="overflow:hidden; text-overflow:ellipsis;"><strong>${doc.document_name}</strong></div>
                         <div>${doc.document_type || ""}</div>
                     </div>
-                    <div class="activity-two-col">
-                        <small>${doc.activity_name || ""}</small>
-                    </div>
+                    <small>${doc.activity_name || ""}</small>
                 </div>
-                <div style="margin-left: 20px;">
+                <div style="margin-left: 20px; display: flex; gap: 5px;">
                     <button class="return-btn">Return</button>
                     <button class="delete-btn">Delete</button>
                 </div>
@@ -194,15 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.stopPropagation();
                 handleDelete("document", doc.document_id, doc.document_name);
             });
-
-            div.addEventListener("click", () => {
-                showModal(doc.document_name, `<p><strong>Type:</strong> ${doc.document_type}</p><p><strong>Activity:</strong> ${doc.activity_name}</p>`);
-            });
             documentsElem.appendChild(div);
         });
     }
 
-    // --- Modal & Action Helpers ---
     function showModal(title, htmlContent) {
         modalTitle.textContent = title;
         modalContent.innerHTML = htmlContent;
@@ -214,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleDelete(type, id, name) {
         if (!confirm(`Are you sure you want to delete ${type} "${name}"?`)) return;
-
         fetch("../php/delete_activity.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -231,7 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- Search with Debounce ---
     let searchTimeout;
     searchInput.addEventListener("input", (e) => {
         clearTimeout(searchTimeout);

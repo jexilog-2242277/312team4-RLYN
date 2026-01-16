@@ -127,11 +127,13 @@ body {
 }
 
 .filter {
-    flex: 0 0 400px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: visible !important;
+    width: 100%;
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease; /* Smooth transition when expanding/minimizing */
 }
 
 .filter-controls {
@@ -159,11 +161,9 @@ body {
 }
 
 .filter-panels {
-    position: absolute;
-    top: 40px;
-    left: 0;
     width: 100%;
-    z-index: 999;
+    /* This ensures that when display:none hits, the space is reclaimed */
+    overflow: hidden; 
 }
 
 .sub-panel {
@@ -184,8 +184,12 @@ body {
 
 .sdg-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-    gap: 5px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 10px;
 }
 
 .sdg-item {

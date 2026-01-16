@@ -2,9 +2,9 @@
 // config/db.php
 $host = "localhost";
 $port = "5432";
-$dbname = "312team4-RLYN";
+$dbname = "312team-RLYN-mid";
 $user = "postgres";
-$password = "123";
+$password = "Imthelegendboy3!";
 
 $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
 

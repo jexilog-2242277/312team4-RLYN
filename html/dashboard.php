@@ -17,20 +17,19 @@ if (!isset($_SESSION['user_id'])) {
 <body>
 
   <header class="header">
-  <div class="header-nav">
-    <?php include '../includes/header.php'; ?>
-  </div>
-  
-  <div class="search-container">
-    <div class="notification-wrapper">
-        <div class="bell-trigger" id="bellIcon">
-            <span class="material-icons">notifications</span>
-        </div>
+    <div class="header-nav">
+      <?php include '../includes/header.php'; ?>
     </div>
-
-    <input type="text" id="searchInput" class="search-input" placeholder="Search">
-  </div>
-</header>
+    
+    <div class="search-container">
+      <div class="notification-wrapper">
+          <div class="bell-trigger" id="bellIcon">
+              <span class="material-icons">notifications</span>
+          </div>
+      </div>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search">
+    </div>
+  </header>
 
   <div class="main-container">
 
@@ -77,17 +76,28 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="">Choose Year</option>
                 <option value="2024-2025">2024-2025</option>
                 <option value="2023-2024">2023-2024</option>
+                <option value="2022-2023">2022-2023</option>
               </select>
             </div>
 
-            <div id="panelSDG" class="sub-panel" style="display: none; margin-top: 10px;">
-              <div class="sdg-grid">
-                <?php for($i = 1; $i <= 17; $i++): ?>
-                  <div class="sdg-item">
-                    <label for="sdg<?php echo $i; ?>"><?php echo $i; ?></label>
-                    <input type="checkbox" id="sdg<?php echo $i; ?>" value="<?php echo $i; ?>">
+            <div id="panelSDG" class="sub-panel" style="display: none; margin-top: 10px; background: white; border: 1px solid #0E0465; padding: 15px; border-radius: 8px; max-width: 350px;">
+              <h4 style="margin-bottom: 10px; color: #0E0465; border-bottom: 1px solid #eee; padding-bottom: 5px;">SDG Filters</h4>
+              <div class="sdg-list" style="max-height: 250px; overflow-y: auto;">
+                <?php 
+                $sdg_names = [
+                  1 => "No Poverty", 2 => "Zero Hunger", 3 => "Good Health", 
+                  4 => "Quality Education", 5 => "Gender Equality", 6 => "Clean Water",
+                  7 => "Affordable Energy", 8 => "Decent Work", 9 => "Industry & Innovation",
+                  10 => "Reduced Inequality", 11 => "Sustainable Cities", 12 => "Responsible Consumption",
+                  13 => "Climate Action", 14 => "Life Below Water", 15 => "Life on Land",
+                  16 => "Peace & Justice", 17 => "Partnerships"
+                ];
+                foreach($sdg_names as $num => $name): ?>
+                  <div class="sdg-item" style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0;">
+                    <label for="sdg<?php echo $num; ?>" style="font-size: 14px;">SDG <?php echo $num; ?>: <?php echo $name; ?></label>
+                    <input type="checkbox" id="sdg<?php echo $num; ?>" value="<?php echo $num; ?>">
                   </div>
-                <?php endfor; ?>
+                <?php endforeach; ?>
               </div>
             </div>
           </div>
@@ -122,14 +132,14 @@ if (!isset($_SESSION['user_id'])) {
     </section>
   </div>
 
-  <div id="modal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 1000;">
-    <div style="background:#fff; padding:20px; border-radius:10px; width:400px;">
-      <h3 id="modalTitle">Activity Details</h3>
-      <div id="modalContent"></div>
-      <button id="closeModal" style="margin-top:10px; padding: 5px 15px; cursor: pointer;">Close</button>
+  <div id="modal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 2000;">
+    <div style="background:#fff; padding:20px; border-radius:10px; width:450px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+      <h3 id="modalTitle" style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;">Activity Details</h3>
+      <div id="modalContent" style="line-height: 1.6; color: #333;"></div>
+      <button id="closeModal" style="margin-top:20px; padding: 8px 20px; cursor: pointer; background: #0E0465; color: white; border: none; border-radius: 4px;">Close</button>
     </div>
   </div>
 
   <script src="../js/dashboard.js"></script>
 </body>
-</html> 
+</html>
