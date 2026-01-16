@@ -12,17 +12,25 @@ if (!isset($_SESSION['user_id'])) {
   <meta charset="UTF-8">
   <title>Organization Dashboard</title>
   <link rel="stylesheet" href="../css/dashboardstyle.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 
   <header class="header">
-    <div class="header-nav">
-      <?php include '../includes/header.php'; ?>
+  <div class="header-nav">
+    <?php include '../includes/header.php'; ?>
+  </div>
+  
+  <div class="search-container">
+    <div class="notification-wrapper">
+        <div class="bell-trigger" id="bellIcon">
+            <span class="material-icons">notifications</span>
+        </div>
     </div>
-    <div class="search-container">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search">
-    </div>
-  </header>
+
+    <input type="text" id="searchInput" class="search-input" placeholder="Search">
+  </div>
+</header>
 
   <div class="main-container">
 

@@ -21,11 +21,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #0E0465;
-    height: 65px;
-    padding: 0 25px;
-    color: white;
-    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.2);
+    background-color: #0E0465; /* */
+    height: 65px; /* */
+    padding: 0 25px; /* */
+    color: white; /* */
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.2); /* */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -34,28 +34,36 @@ body {
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 15px; /* */
 }
 
 .logo {
-    height: 50px;
-    margin-right: 10px;
+    height: 50px; /* */
+    margin-right: 10px; /* */
 }
 
 .header-nav a {
     color: white;
     text-decoration: none;
     font-weight: bold;
-    font-size: 15px;
+    font-size: 15px; /* */
+}
+
+/* Updated container to group Bell and Search Bar together on the right */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Pushes the entire group to the right */
+    gap: 20px; /* Control the distance between Bell and Search Bar here */
 }
 
 .search-input {
-    width: 220px;
-    height: 34px;
-    border-radius: 8px;
+    width: 220px; /* */
+    height: 34px; /* */
+    border-radius: 8px; /* */
     border: none;
-    padding: 0 15px;
-    background-color: #e6e6f0;
+    padding: 0 15px; /* */
+    background-color: #e6e6f0; /* */
     outline: none;
     transition: width 0.3s;
 }
@@ -273,4 +281,81 @@ body {
 
 #modal {
     z-index: 2000;
+}
+
+/* === NOTIFICATION AREA === */
+.notification-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bell-trigger {
+    cursor: pointer;
+    color: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.bell-trigger:hover {
+    transform: scale(1.1);
+    color: #e6e6f0;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff4d4d;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 50%;
+    border: 2px solid #0E0465; /* Matches header background */
+}
+
+.notif-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 280px;
+    background-color: white;
+    border: 1px solid #0E0465;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 2000;
+    overflow: hidden;
+}
+
+.notif-header {
+    background-color: #f4f4f9;
+    padding: 10px;
+    font-weight: bold;
+    color: #0E0465;
+    border-bottom: 1px solid #eee;
+}
+
+.notif-item {
+    padding: 12px;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.notif-item:hover {
+    background-color: #f0f0f5;
+}
+
+.notif-footer {
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #0E0465;
+    font-weight: bold;
+    cursor: pointer;
 }

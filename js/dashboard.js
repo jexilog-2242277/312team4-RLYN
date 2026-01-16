@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
                 <div style="margin-left: 20px;">
+                    <button class="return-btn">Return</button>
                     <button class="delete-btn" data-id="${act.activity_id}">Delete</button>
                 </div>
             `;
@@ -184,6 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
                 <div style="margin-left: 20px;">
+                    <button class="return-btn">Return</button>
                     <button class="delete-btn">Delete</button>
                 </div>
             `;
