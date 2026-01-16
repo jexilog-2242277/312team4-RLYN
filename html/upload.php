@@ -12,6 +12,7 @@ if (!isset($_SESSION['user_id'])) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/createstyle.css" /> 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <title>Document Upload | Student Org</title>
   <style>
     /* * IMPORTANT: This CSS ensures only the custom button is visible 
@@ -82,6 +83,11 @@ if (!isset($_SESSION['user_id'])) {
       <?php include '../includes/header.php'; ?>
     </div>
     <div class="search-container">
+        <div class="notification-wrapper">
+        <div class="bell-trigger" id="bellIcon">
+            <span class="material-icons">notifications</span>
+        </div>
+    </div>
       <input type="text" class="search-input" placeholder="Search">
     </div>
   </header>

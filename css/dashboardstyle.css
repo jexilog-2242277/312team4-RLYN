@@ -23,9 +23,9 @@ body {
     justify-content: space-between;
     background-color: #0E0465; /* */
     height: 65px; /* */
-    padding: 0 25px; /* */
+    padding: 0 25px 0 0; /* */
     color: white; /* */
-    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.2); /* */
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.58); /* */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -34,11 +34,12 @@ body {
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 15px; /* */
+    gap: 10px; /* */
 }
 
+
 .logo {
-    height: 50px; /* */
+    height: 65px; /* */
     margin-right: 10px; /* */
 }
 
@@ -58,9 +59,9 @@ body {
 }
 
 .search-input {
-    width: 220px; /* */
-    height: 34px; /* */
-    border-radius: 8px; /* */
+    width: 200px; /* */
+    height: 30px; /* */
+    border-radius: 6px; /* */
     border: none;
     padding: 0 15px; /* */
     background-color: #e6e6f0; /* */
@@ -283,7 +284,6 @@ body {
     z-index: 2000;
 }
 
-/* === NOTIFICATION AREA === */
 .notification-wrapper {
     position: relative;
     display: flex;
@@ -314,11 +314,11 @@ body {
     font-weight: bold;
     padding: 2px 5px;
     border-radius: 50%;
-    border: 2px solid #0E0465; /* Matches header background */
+    border: 2px solid #0E0465; 
 }
 
 .notif-dropdown {
-    display: none; /* Hidden by default */
+    display: none; 
     position: absolute;
     top: 45px;
     right: 0;
