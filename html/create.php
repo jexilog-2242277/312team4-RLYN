@@ -62,11 +62,11 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="form-group">
               <p>Start Date</p>
-              <input type="date" name="startDate" class="form-input" required>
+              <input type="date" name="startDate" id="startDate" class="form-input" required>
             </div>
             <div class="form-group">
               <p>End Date</p>
-              <input type="date" name="endDate" class="form-input" required>
+              <input type="date" name="endDate" id="endDate" class="form-input" required>
             </div>
             <div class="form-group" style="grid-column: span 2;">
               <p>Project Description</p>
