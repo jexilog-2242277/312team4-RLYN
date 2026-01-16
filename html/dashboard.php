@@ -4,13 +4,23 @@ if (!isset($_SESSION['user_id'])) {
   header("Location: login.html");
   exit;
 }
+
+// Determine the Dashboard Title based on Role
+$userRole = $_SESSION['role'] ?? 'organization'; // Default to organization
+$dashboardTitle = "Organization Dashboard";
+
+if ($userRole === 'osas') {
+    $dashboardTitle = "OSAS Dashboard";
+} elseif ($userRole === 'admin') {
+    $dashboardTitle = "Admin Dashboard";
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Organization Dashboard</title>
+  <title><?php echo $dashboardTitle; ?></title> 
   <link rel="stylesheet" href="../css/dashboardstyle.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -19,6 +29,9 @@ if (!isset($_SESSION['user_id'])) {
   <header class="header">
     <div class="header-nav">
       <?php include '../includes/header.php'; ?>
+      <span style="color: white; font-weight: bold; margin-left: 15px; font-size: 1.2rem;">
+        <?php echo $dashboardTitle; ?>
+      </span>
     </div>
     
     <div class="search-container">
