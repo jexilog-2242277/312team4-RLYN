@@ -223,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="delete-btn">Delete</button>
             `;
         } else if (userRole === 'student') {
-            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Returned';
-            const statusColor = doc.visibility === 'public' ? '#0E0465' : '#dc3545';
+            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Submitted';
+            const statusColor = doc.visibility === 'public' ? '#0E0465' : '#33af3d';
             actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
         }
 
