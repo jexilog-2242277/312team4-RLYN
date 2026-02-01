@@ -54,7 +54,7 @@ if ($userRole === 'osas') {
       <?php if ($userRole === 'student'): ?>
           <li><a href="create.php">Create Activity</a></li>
           <li><a href="upload.php">Upload Documents</a></li>
-          <li><a href="returned.php">Returned Files</a></li>
+          <!-- <li><a href="returned.php">Returned Files</a></li> -->
       <?php endif; ?>
 
       <li><a href="../php/logout.php">Logout</a></li>
