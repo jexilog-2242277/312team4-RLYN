@@ -47,19 +47,20 @@ if ($userRole === 'osas') {
   <div class="main-container">
 
     <aside class="sidebar">
-      <nav class="sidebar-nav">
-        <ul>
-          <li><a href="dashboard.php" class="active">Dashboard</a></li>
-          
-           <?php if ($userRole === 'student'): ?>
-            <li><a href="create.php">Create Activity</a></li>
-            <li><a href="upload.php">Upload Documents</a></li>
-            <li><a href="returned.php">Returned Files</a></li>
-          <?php endif; ?>
-          <li><a href="../php/logout.php">Logout</a></li>
-        </ul>
-      </nav>
-    </aside>
+  <nav class="sidebar-nav">
+    <ul>
+      <li><a href="dashboard.php" class="active">Dashboard</a></li>
+      
+      <?php if ($userRole === 'student'): ?>
+          <li><a href="create.php">Create Activity</a></li>
+          <li><a href="upload.php">Upload Documents</a></li>
+          <li><a href="returned.php">Returned Files</a></li>
+      <?php endif; ?>
+
+      <li><a href="../php/logout.php">Logout</a></li>
+    </ul>
+  </nav>
+</aside>
 
     <section class="content-area">
       <div class="stats-grid">
@@ -149,7 +150,7 @@ if ($userRole === 'osas') {
     </section>
   </div>
 
-  <div id="modal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 2000;">
+  <div id="modal" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 2000;">
     <div style="background:#fff; padding:20px; border-radius:10px; width:450px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
       <h3 id="modalTitle" style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;">Activity Details</h3>
       <div id="modalContent" style="line-height: 1.6; color: #333;"></div>
