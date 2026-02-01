@@ -119,12 +119,12 @@ try {
 
     // --- 3. Document Query Execution ---
     if ($userRole === 'osas' || $userRole === 'admin') {
-        $docQuery = "SELECT d.*, o.name AS org_name, a.name AS activity_name
-                     FROM documents d
-                     LEFT JOIN organizations o ON d.org_id = o.org_id
-                     JOIN activities a ON d.activity_id = a.activity_id
-                     WHERE 1=1 " . $documentSearchFilter . " 
-                     ORDER BY d.uploaded_at DESC LIMIT 50";
+      $docQuery = "SELECT d.document_id, d.document_name, d.document_type, d.document_file_path, o.name AS org_name, a.name AS activity_name
+                 FROM documents d
+                 LEFT JOIN organizations o ON d.org_id = o.org_id
+                 JOIN activities a ON d.activity_id = a.activity_id
+                 WHERE 1=1 " . $documentSearchFilter . " 
+                 ORDER BY d.uploaded_at DESC LIMIT 50";
         $docResult = pg_query_params($conn, $docQuery, $params);
     } else {
         $docQuery = "SELECT d.*, o.name AS org_name, a.name AS activity_name

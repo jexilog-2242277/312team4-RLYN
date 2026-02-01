@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnClear = document.getElementById("btnClear");
 
     // --- State Management ---
+    let userRole = ""; 
     let currentFilters = {
         search: "",
         year: "",
@@ -61,32 +62,22 @@ document.addEventListener("DOMContentLoaded", () => {
     tabBtnActivities.addEventListener("click", () => switchTab('activities'));
     tabBtnDocuments.addEventListener("click", () => switchTab('documents'));
 
-    // --- ENHANCED: Minimizing / Toggle Logic ---
-
-    // Helper to hide all sub-panels
     const hideAllPanels = () => {
         [panelOrg, panelYear, panelSDG].forEach(p => { if(p) p.style.display = "none"; });
         [btnAll, btnOrg, btnYear, btnSDG].forEach(b => { if(b) b.classList.remove("active"); });
     };
 
-    // "All" Button logic: Reset everything and hide panels
     btnAll.addEventListener("click", () => {
         hideAllPanels();
         btnAll.classList.add("active");
-        
-        // Reset local selection UI
         if(orgSelect) orgSelect.value = "";
         if(yearSelect) yearSelect.value = "";
         sdgCheckboxes.forEach(cb => cb.checked = false);
-        
-        // Reset filter state
         currentFilters.year = "";
         currentFilters.sdgs = [];
-        
         loadDashboardData();
     });
 
-    // Toggle Org Panel
     if(btnOrg) {
         btnOrg.addEventListener("click", () => {
             const isVisible = panelOrg.style.display === "block";
@@ -100,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Toggle Year Panel
     btnYear.addEventListener("click", () => {
         const isVisible = panelYear.style.display === "block";
         hideAllPanels();
@@ -112,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Toggle SDG Panel
     btnSDG.addEventListener("click", () => {
         const isVisible = panelSDG.style.display === "block";
         hideAllPanels();
@@ -124,42 +113,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Apply and Clear Logic ---
-
     btnApply.addEventListener("click", () => {
-        // Capture choices
         currentFilters.year = yearSelect.value;
         currentFilters.sdgs = Array.from(sdgCheckboxes)
             .filter(i => i.checked)
             .map(i => i.value);
-        
-        // Fetch new data
         loadDashboardData();
-        
-        // MINIMIZE: Hide panels after applying
         hideAllPanels();
         btnAll.classList.add("active");
     });
 
     btnClear.addEventListener("click", () => {
-        // Reset UI selections
         if(orgSelect) orgSelect.value = "";
         if(yearSelect) yearSelect.value = "";
         sdgCheckboxes.forEach(cb => cb.checked = false);
-        
-        // Reset state
         currentFilters.year = "";
         currentFilters.sdgs = [];
-        
-        // Fetch data (shows everything)
         loadDashboardData();
-        
-        // MINIMIZE: Hide panels after clearing
         hideAllPanels();
         btnAll.classList.add("active");
     });
 
-    // --- Data Fetching & Rendering (Preserved Logic) ---
+    // --- Data Fetching & Rendering ---
 
     function loadDashboardData() {
         const params = new URLSearchParams();
@@ -171,6 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.error) return console.error("API Error:", data.error);
+                
+                // Content Manipulation: Store role for button toggling
+                userRole = data.userRole; 
+
                 totalActivities.textContent = data.totalActivities || 0;
                 totalDocuments.textContent = data.totalDocuments || 0;
                 renderActivities(data.activities || []);
@@ -179,59 +158,76 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(err => console.error("Fetch error:", err));
     }
 
-   function renderActivities(activities) {
-    // Clear the container or show a message if no activities exist
-    activitiesElem.innerHTML = activities.length ? "" : "<p style='padding:15px;'>No activities found.</p>";
-    
-    activities.forEach(act => {
-        const div = document.createElement("div");
-        div.className = "activity-item";
-        // Apply styling for the activity item layout
-        div.style = "padding: 10px; border-bottom: 1px solid #ccc; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
-        
-        // Render activity details and the single Delete button
-        div.innerHTML = `
-            <div style="flex-grow: 1;">
-                <div class="activity-two-col">
-                    <div style="overflow:hidden; text-overflow:ellipsis;"><strong>Name:</strong> ${act.name}</div>
-                    <div><strong>Docs:</strong> ${act.doc_count || 0}</div>
-                </div>
-                <div class="activity-two-col">
-                    <div><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</div>
-                    <div><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</div>
-                </div>
-            </div>
-            <div style="margin-left: 20px;">
-                <button class="delete-btn" data-id="${act.activity_id}">Delete</button>
-            </div>
-        `;
-        
-        // Add event listener for the Delete button
-        div.querySelector(".delete-btn").addEventListener("click", (e) => {
-            e.stopPropagation();
-            handleDelete("activity", act.activity_id, act.name);
-        });
+    function renderActivities(activities) {
+        activitiesElem.innerHTML = activities.length ? "" : "<p style='padding:15px;'>No activities found.</p>";
+        activities.forEach(act => {
+            const div = document.createElement("div");
+            div.className = "activity-item";
+            div.style = "padding: 10px; border-bottom: 1px solid #ccc; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
+            
+            // Content Manipulation: Toggling buttons vs status labels
+            let actionHtml = "";
+            if (userRole === 'osas' || userRole === 'admin') {
+                actionHtml = `<button class="delete-btn" data-id="${act.activity_id}">Delete</button>`;
+            } else if (userRole === 'student') {
+                actionHtml = `<span style="color: #28a745; font-weight: bold;">Submitted</span>`;
+            }
 
-        // Add event listener to show detailed information in a modal
-        div.addEventListener("click", () => {
-            showModal(act.name, `
-                <p><strong>Organization:</strong> ${act.org_name || "N/A"}</p>
-                <p><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</p>
-                <p><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</p>
-                <p><strong>Description:</strong><br>${act.description || "No description."}</p>
-            `);
-        });
-        
-        activitiesElem.appendChild(div);
-    });
-}
+            div.innerHTML = `
+                <div style="flex-grow: 1;">
+                    <div class="activity-two-col">
+                        <div style="overflow:hidden; text-overflow:ellipsis;"><strong>Name:</strong> ${act.name}</div>
+                        <div><strong>Docs:</strong> ${act.doc_count || 0}</div>
+                    </div>
+                    <div class="activity-two-col">
+                        <div><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</div>
+                        <div><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</div>
+                    </div>
+                </div>
+                <div style="margin-left: 20px; display: flex; gap: 5px;">
+                    ${actionHtml}
+                </div>
+            `;
+            
+            if (userRole === 'osas' || userRole === 'admin') {
+                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    handleDelete("activity", act.activity_id, act.name);
+                });
+            }
 
-  function renderDocuments(documents) {
+            div.addEventListener("click", () => {
+                showModal(act.name, `
+                    <p><strong>Organization:</strong> ${act.org_name || "N/A"}</p>
+                    <p><strong>SDG:</strong> ${act.sdg_relation || "N/A"}</p>
+                    <p><strong>Academic Year:</strong> ${act.academic_year || "N/A"}</p>
+                    <p><strong>Description:</strong><br>${act.description || "No description."}</p>
+                `);
+            });
+            activitiesElem.appendChild(div);
+        });
+    }
+
+    function renderDocuments(documents) {
     documentsElem.innerHTML = documents.length ? "" : "<p style='padding:15px;'>No documents found.</p>";
     documents.forEach(doc => {
         const div = document.createElement("div");
         div.className = "doc-item";
-        div.style = "padding: 10px; border-bottom: 1px solid #ccc; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
+        div.style = "padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;";
+        
+        let actionHtml = "";
+        if (userRole === 'osas' || userRole === 'admin') {
+            // Added Download button next to Delete
+            actionHtml = `
+                <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
+                <button class="delete-btn">Delete</button>
+            `;
+        } else if (userRole === 'student') {
+            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Returned';
+            const statusColor = doc.visibility === 'public' ? '#0E0465' : '#dc3545';
+            actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
+        }
+
         div.innerHTML = `
             <div style="flex-grow: 1;">
                 <div class="activity-two-col">
@@ -240,18 +236,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <small>${doc.activity_name || ""}</small>
             </div>
-            <div style="margin-left: 20px;">
-                <button class="delete-btn">Delete</button>
+            <div style="margin-left: 20px; display: flex; gap: 10px; align-items: center;">
+                ${actionHtml}
             </div>
         `;
 
-        div.querySelector(".delete-btn").addEventListener("click", (e) => {
-            e.stopPropagation();
-            handleDelete("document", doc.document_id, doc.document_name);
+            if (userRole === 'osas' || userRole === 'admin') {
+                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    handleDelete("document", doc.document_id, doc.document_name);
+                });
+            }
+            documentsElem.appendChild(div);
         });
-        documentsElem.appendChild(div);
-    });
-}
+    }
 
     function showModal(title, htmlContent) {
         modalTitle.textContent = title;
@@ -272,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(res => res.json())
         .then(result => {
             if (result.success) {
-                alert(`${type} deleted.`);
+                alert(`${type} deleted.`);D
                 loadDashboardData();
             } else {
                 alert("Error: " + result.error);
@@ -289,6 +287,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 300);
     });
 
-    // Initial Load
     loadDashboardData();
 });
