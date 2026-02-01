@@ -7,12 +7,12 @@ if (!isset($_SESSION['user_id'])) {
 
 // Determine the Dashboard Title based on Role
 $userRole = $_SESSION['role'] ?? 'organization'; // Default to organization
-$dashboardTitle = "Organization Dashboard";
+$dashboardTitle = "";
 
 if ($userRole === 'osas') {
-    $dashboardTitle = "OSAS Dashboard";
+    $dashboardTitle = "";
 } elseif ($userRole === 'admin') {
-    $dashboardTitle = "Admin Dashboard";
+    $dashboardTitle = "";
 }
 ?>
 
@@ -50,9 +50,12 @@ if ($userRole === 'osas') {
       <nav class="sidebar-nav">
         <ul>
           <li><a href="dashboard.php" class="active">Dashboard</a></li>
-          <li><a href="create.php">Create Activity</a></li>
-          <li><a href="upload.php">Upload Documents</a></li>
-          <li><a href="returned.php">Returned Files</a></li>
+          
+           <?php if ($userRole === 'student'): ?>
+            <li><a href="create.php">Create Activity</a></li>
+            <li><a href="upload.php">Upload Documents</a></li>
+            <li><a href="returned.php">Returned Files</a></li>
+          <?php endif; ?>
           <li><a href="../php/logout.php">Logout</a></li>
         </ul>
       </nav>

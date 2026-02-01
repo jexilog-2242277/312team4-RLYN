@@ -67,7 +67,7 @@ try {
 
     } 
     // --- 2. Organization User: Organization-Specific Filters ---
-    else if ($orgId) {
+    else if ($userRole === 'student' && $orgId) {
         $params[] = $orgId; // $1 is always Org ID
         $paramIndex = 2;
 
@@ -147,6 +147,7 @@ try {
     $totalDocs = (int)pg_fetch_result($docCountRes, 0, 0);
 
     echo json_encode([
+        "userRole" => $userRole,
         "activities" => $activities,
         "documents" => $documents,
         "totalActivities" => count($activities), 
