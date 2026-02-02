@@ -35,16 +35,21 @@ if ($userRole === 'osas') {
     </div>
     
     <div class="search-container">
-      <div class="notification-wrapper" style="position: relative;">
-          <div class="bell-trigger" id="bellIcon" style="cursor: pointer; color: white; margin-right: 15px; display: flex; align-items: center;">
-              <span class="material-icons" style="font-size:28px;">notifications</span>
-          </div>
-          
-          <!-- Badge for unread notifications -->
-          <span id="notifCount" 
-                style="position: absolute; top: -5px; right: 5px; background:red; color:white; 
-                       font-size:12px; padding:2px 6px; border-radius:50%; display:none;">0</span>
-      </div>
+        <?php if ($userRole !== 'osas'): // hide bell for OSAs ?>
+        <div class="notification-wrapper" style="position: relative;">
+            <div class="bell-trigger" id="bellIcon" style="cursor: pointer; color: white; margin-right: 15px; display: flex; align-items: center;">
+                <span class="material-icons" style="font-size:28px;">notifications</span>
+            </div>
+            
+            <!-- Badge for unread notifications -->
+            <span id="notifCount" 
+                  style="position: absolute; top: -5px; right: 5px; background:red; color:white; 
+                         font-size:12px; padding:2px 6px; border-radius:50%; display:none;">0</span>
+        </div>
+        <?php endif; ?>
+      
+        <input type="text" id="searchInput" class="search-input" placeholder="Search">
+    </div>
       
       <input type="text" id="searchInput" class="search-input" placeholder="Search">
     </div>
