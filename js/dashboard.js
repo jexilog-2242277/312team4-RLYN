@@ -152,6 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderDocuments(data.documents || []);
             })
             .catch(err => console.error("Fetch error:", err));
+    
+        setInterval(loadDashboardData, 10000);
+        loadDashboardData();
+
     }
 
     // --- Render Functions ---
@@ -329,7 +333,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "returned.php";
     });
 
-    setInterval(loadDashboardData, 10000);
     loadDashboardData();
 
 });
