@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Content Manipulation: Toggling buttons vs status labels
             let actionHtml = "";
             if (userRole === 'osas' || userRole === 'admin') {
-                actionHtml = `<button class="delete-btn" data-id="${act.activity_id}">Delete</button>`;
+                actionHtml = `<button class="return-btn" data-id="${act.activity_id}">Return</button>`;
             } else if (userRole === 'student') {
                 actionHtml = `<span style="color: #28a745; font-weight: bold;">Submitted</span>`;
             }
@@ -190,9 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             
             if (userRole === 'osas' || userRole === 'admin') {
-                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                div.querySelector(".return-btn").addEventListener("click", (e) => {
                     e.stopPropagation();
-                    handleDelete("activity", act.activity_id, act.name);
+                    handleReturn("activity", act.activity_id, act.name);
                 });
             }
 
@@ -217,13 +217,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         let actionHtml = "";
         if (userRole === 'osas' || userRole === 'admin') {
-            // Added Download button next to Delete
+            // Added Download button next to Return
             actionHtml = `
                 <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
-                <button class="delete-btn">Delete</button>
+                <button class="return-btn">Return</button>
             `;
         } else if (userRole === 'student') {
-            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Submitted';
+            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Uploaded';
             const statusColor = doc.visibility === 'public' ? '#0E0465' : '#33af3d';
             actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
         }
@@ -242,9 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
             if (userRole === 'osas' || userRole === 'admin') {
-                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                div.querySelector(".return-btn").addEventListener("click", (e) => {
                     e.stopPropagation();
-                    handleDelete("document", doc.document_id, doc.document_name);
+                    handleReturn("document", doc.document_id, doc.document_name);
                 });
             }
             documentsElem.appendChild(div);
@@ -260,32 +260,66 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal.onclick = () => modal.style.display = "none";
     window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
 
-    function handleDelete(type, id, name) {
-        if (!confirm(`Are you sure you want to delete ${type} "${name}"?`)) return;
-        fetch("../php/delete_activity.php", {
+    function handleReturn(type, id, name) {
+    // Set the Modal Title
+    const modalTitle = document.getElementById("modalTitle");
+    const modalContent = document.getElementById("modalContent");
+    const modal = document.getElementById("modal");
+
+    modalTitle.textContent = `Return ${type}: ${name}`;
+    
+    // Inject a textarea and a submit button into the modal content
+    modalContent.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <p>Please provide a reason for returning this ${type}:</p>
+            <textarea id="returnReasonText" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" placeholder="Enter reason here..."></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="cancelReturn" style="padding: 8px 15px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                <button id="submitReturn" style="padding: 8px 15px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Return</button>
+            </div>
+        </div>
+    `;
+
+    // Show the Modal
+    modal.style.display = "flex";
+
+    // Handle Cancel
+    document.getElementById("cancelReturn").onclick = () => {
+        modal.style.display = "none";
+    };
+
+    // Handle Submit
+    document.getElementById("submitReturn").onclick = () => {
+        const reason = document.getElementById("returnReasonText").value.trim();
+        
+        if (!reason) {
+            alert("A reason is required to return an item.");
+            return;
+        }
+
+        // Perform the existing fetch call
+        fetch("../php/return_item.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type: type, activity_id: id, id: id })
+            body: JSON.stringify({ 
+                type: type, 
+                id: id, 
+                reason: reason 
+            })
         })
         .then(res => res.json())
         .then(result => {
             if (result.success) {
-                alert(`${type} deleted.`);D
-                loadDashboardData();
+                alert(`${type} has been returned.`);
+                modal.style.display = "none"; // Close modal
+                loadDashboardData(); // Refresh list
             } else {
                 alert("Error: " + result.error);
             }
-        });
-    }
-
-    let searchTimeout;
-    searchInput.addEventListener("input", (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            currentFilters.search = e.target.value.trim();
-            loadDashboardData();
-        }, 300);
-    });
+        })
+        .catch(err => console.error("Fetch error:", err));
+    };
+}
 
     loadDashboardData();
 });

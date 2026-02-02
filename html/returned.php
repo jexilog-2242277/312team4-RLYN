@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Determine the Dashboard Title based on Role
 $userRole = $_SESSION['role'] ?? 'organization'; 
-$dashboardTitle = "Organization Dashboard";
+$dashboardTitle = "";
 
 if ($userRole === 'osas') {
     $dashboardTitle = "";
@@ -60,13 +60,14 @@ if ($userRole === 'osas') {
         line-height: 1.5;
     }
 
-    /* --- Action Buttons --- */
-    .action-btn-container { display: flex; gap: 15px; justify-content: flex-end; padding-right: 10px; }
-    .btn-icon { border: none; background: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; }
-    .btn-icon:hover { transform: scale(1.2); }
-    .btn-edit { color: #fbbc04; }
-    .btn-reupload { color: #0E0465; }
-    .btn-delete { color: #d93025; }
+    /* --- Action Buttons (Simplified) --- */
+    .action-btn-container { 
+        display: flex; 
+        gap: 5px; 
+        justify-content: flex-end; 
+        padding-right: 10px; 
+    }
+    /* No custom button CSS - using browser defaults */
   </style>
 </head>
 <body>
@@ -113,15 +114,6 @@ if ($userRole === 'osas') {
             <button type="button" class="filter-btn apply-btn" id="btnApply" style="margin-left: 20px; background-color: #28a745; color: white;">Apply</button>
             <button type="button" class="filter-btn clear-btn" id="btnClear" style="background-color: #dc3545; color: white;">Clear</button>
           </div>
-          <div class="filter-panels">
-            <div id="panelOrg" class="sub-panel" style="display: none; margin-top: 10px;">
-              <select id="orgSelect" class="filter-select">
-                <option value="">Choose Organization</option>
-                <option value="SAMCIS">SAMCIS</option>
-                <option value="SEA">SEA</option>
-              </select>
-            </div>
-            </div>
         </div>
 
         <div class="stat-card">
@@ -141,33 +133,9 @@ if ($userRole === 'osas') {
           <div class="activities-content">
             <table class="returned-table">
                 <tbody id="returnedItems">
-                    <tr>
-                        <td style="width: 45%;">
-                            <div class="activity-info-box">
-                                <div class="activity-two-col">
-                                    <div><strong>Name:</strong> Zero Waste Seminar</div>
-                                    <div><strong>Docs:</strong> 1</div>
-                                </div>
-                                <div class="activity-two-col">
-                                    <div><strong>Academic Year:</strong> 2024-2025</div>
-                                    <div><strong>SDG:</strong> SDG 12: Responsible Consumption</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="width: 60%;">
-                            <div class="reason-box">
-                                "Please provide a more detailed breakdown of the proposed budget."
-                            </div>
-                        </td>
-                        <td style="width: 15%;">
-                            <div class="action-btn-container">
-                                <button class="btn-icon btn-edit"><span class="material-icons">edit</span></button>
-                                <button class="btn-icon btn-reupload"><span class="material-icons">file_upload</span></button>
-                                <button class="btn-icon btn-delete"><span class="material-icons">delete</span></button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
+    </tbody>
+
+<script src="../js/returned.js"></script>
             </table>
           </div>
         </div>

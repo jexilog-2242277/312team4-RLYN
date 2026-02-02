@@ -12,7 +12,6 @@ if (!isset($_SESSION['user_id'])) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/createstyle.css" /> 
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <title>Document Upload | Student Org</title>
   <style>
     /* * IMPORTANT: This CSS ensures only the custom button is visible 
@@ -99,7 +98,7 @@ if (!isset($_SESSION['user_id'])) {
           <li><a href="dashboard.php">Dashboard</a></li>
           <li><a href="create.php">Create Activity</a></li>
           <li><a href="upload.php" class="active">Upload Documents</a></li>
-          <!-- <li><a href="returned.php">Returned Files</a></li> -->
+          <li><a href="returned.php">Returned Files</a></li>
           <li><a href="../php/logout.php">Logout</a></li>
         </ul>
       </nav>
