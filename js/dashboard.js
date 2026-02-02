@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderDocuments(documents) {
+   function renderDocuments(documents) {
     documentsElem.innerHTML = documents.length ? "" : "<p style='padding:15px;'>No documents found.</p>";
     documents.forEach(doc => {
         const div = document.createElement("div");
@@ -216,15 +216,15 @@ document.addEventListener("DOMContentLoaded", () => {
         div.style = "padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;";
         
         let actionHtml = "";
-        // Inside renderDocuments function
-            if (userRole === 'osas' || userRole === 'admin') {
-                actionHtml = `
-                    <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
-                    <button class="return-btn" data-id="${doc.document_id}">Return</button> 
-                `;
-            } else if (userRole === 'student') {
-            const statusLabel = doc.visibility === 'public' ? 'Uploaded' : 'Uploaded';
-            const statusColor = doc.visibility === 'public' ? '#33af3d' : '#33af3d';
+        if (userRole === 'osas' || userRole === 'admin') {
+            // Changed "Download" to "View" and added target="_blank"
+            actionHtml = `
+                <a href="../uploads/documents/${doc.document_file_path}" target="_blank" class="view-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">View</a>
+                <button class="return-btn" data-id="${doc.document_id}" style="padding: 5px 10px; background: #f39c12; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 5px;">Return</button> 
+            `;
+        } else if (userRole === 'student') {
+            const statusLabel = 'Uploaded';
+            const statusColor = '#33af3d';
             actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
         }
 
@@ -236,22 +236,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <small>${doc.activity_name || ""}</small>
             </div>
-            <div style="margin-left: 20px; display: flex; gap: 10px; align-items: center;">
+            <div style="margin-left: 20px; display: flex; gap: 5px; align-items: center;">
                 ${actionHtml}
             </div>
         `;
 
-                    // Inside renderDocuments function, update the event listener
         if (userRole === 'osas' || userRole === 'admin') {
             div.querySelector(".return-btn").addEventListener("click", (e) => {
                 e.stopPropagation();
-                // Use the doc object directly since it's available in the loop
                 handleReturn("document", doc.document_id, doc.document_name);
             });
         }
-            documentsElem.appendChild(div);
-        });
-    }
+        documentsElem.appendChild(div);
+    });
+}
 
     function showModal(title, htmlContent) {
         modalTitle.textContent = title;
