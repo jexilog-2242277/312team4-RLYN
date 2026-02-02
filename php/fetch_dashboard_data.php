@@ -67,7 +67,7 @@ try {
 
     } 
     // --- 2. Organization User (Student): Organization-Specific Filters ---
-    else if ($userRole === 'student' && $orgId) {
+    else if (($userRole === 'student' || $userRole === 'adviser')&& $orgId) {
         $params[] = $orgId; // $1 is always Org ID
         $paramIndex = 2;
 
