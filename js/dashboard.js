@@ -23,15 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOrg = document.getElementById("btnOrg");
     const btnYear = document.getElementById("btnYear");
     const btnSDG = document.getElementById("btnSDG");
-    
     const panelOrg = document.getElementById("panelOrg");
     const panelYear = document.getElementById("panelYear");
     const panelSDG = document.getElementById("panelSDG");
-    
     const orgSelect = document.getElementById("orgSelect");
     const yearSelect = document.getElementById("yearSelect");
     const sdgCheckboxes = document.querySelectorAll(".sdg-item input");
-    
+
     // Action Buttons
     const btnApply = document.getElementById("btnApply");
     const btnClear = document.getElementById("btnClear");
@@ -67,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         [btnAll, btnOrg, btnYear, btnSDG].forEach(b => { if(b) b.classList.remove("active"); });
     };
 
+    // --- Filter Buttons ---
     btnAll.addEventListener("click", () => {
         hideAllPanels();
         btnAll.classList.add("active");
@@ -134,8 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnAll.classList.add("active");
     });
 
-    // --- Data Fetching & Rendering ---
-
+    // --- Load Dashboard Data ---
     function loadDashboardData() {
         const params = new URLSearchParams();
         if (currentFilters.search) params.append("search", currentFilters.search);
@@ -147,9 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 if (data.error) return console.error("API Error:", data.error);
                 
-                // Content Manipulation: Store role for button toggling
                 userRole = data.userRole; 
-
                 totalActivities.textContent = data.totalActivities || 0;
                 totalDocuments.textContent = data.totalDocuments || 0;
                 renderActivities(data.activities || []);
@@ -158,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(err => console.error("Fetch error:", err));
     }
 
+    // --- Render Functions ---
     function renderActivities(activities) {
         activitiesElem.innerHTML = activities.length ? "" : "<p style='padding:15px;'>No activities found.</p>";
         activities.forEach(act => {
@@ -165,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
             div.className = "activity-item";
             div.style = "padding: 10px; border-bottom: 1px solid #ccc; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
             
-            // Content Manipulation: Toggling buttons vs status labels
             let actionHtml = "";
             if (userRole === 'osas' || userRole === 'admin') {
                 actionHtml = `<button class="return-btn" data-id="${act.activity_id}">Return</button>`;
@@ -188,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${actionHtml}
                 </div>
             `;
-            
+
             if (userRole === 'osas' || userRole === 'admin') {
                 div.querySelector(".return-btn").addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -208,48 +204,49 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-   function renderDocuments(documents) {
-    documentsElem.innerHTML = documents.length ? "" : "<p style='padding:15px;'>No documents found.</p>";
-    documents.forEach(doc => {
-        const div = document.createElement("div");
-        div.className = "doc-item";
-        div.style = "padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;";
-        
-        let actionHtml = "";
-        if (userRole === 'osas' || userRole === 'admin') {
-            actionHtml = `
-                <a href="../uploads/documents/${doc.document_file_path}" target="_blank" class="view-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">View</a>
-                <button class="return-btn" data-id="${doc.document_id}" style="padding: 5px 10px; background: #f39c12; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 5px;">Return</button> 
-            `;
-        } else if (userRole === 'student') {
-            const statusLabel = 'Uploaded';
-            const statusColor = '#33af3d';
-            actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
-        }
+    function renderDocuments(documents) {
+        documentsElem.innerHTML = documents.length ? "" : "<p style='padding:15px;'>No documents found.</p>";
+        documents.forEach(doc => {
+            const div = document.createElement("div");
+            div.className = "doc-item";
+            div.style = "padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;";
+            
+            let actionHtml = "";
+            if (userRole === 'osas' || userRole === 'admin') {
+                actionHtml = `
+                    <a href="../uploads/documents/${doc.document_file_path}" target="_blank" class="view-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">View</a>
+                    <button class="return-btn" data-id="${doc.document_id}" style="padding: 5px 10px; background: #f39c12; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 5px;">Return</button> 
+                `;
+            } else if (userRole === 'student') {
+                const statusLabel = 'Uploaded';
+                const statusColor = '#33af3d';
+                actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
+            }
 
-        div.innerHTML = `
-            <div style="flex-grow: 1;">
-                <div class="activity-two-col">
-                    <div style="overflow:hidden; text-overflow:ellipsis;"><strong>${doc.document_name}</strong></div>
-                    <div>${doc.document_type || ""}</div>
+            div.innerHTML = `
+                <div style="flex-grow: 1;">
+                    <div class="activity-two-col">
+                        <div style="overflow:hidden; text-overflow:ellipsis;"><strong>${doc.document_name}</strong></div>
+                        <div>${doc.document_type || ""}</div>
+                    </div>
+                    <small>${doc.activity_name || ""}</small>
                 </div>
-                <small>${doc.activity_name || ""}</small>
-            </div>
-            <div style="margin-left: 20px; display: flex; gap: 5px; align-items: center;">
-                ${actionHtml}
-            </div>
-        `;
+                <div style="margin-left: 20px; display: flex; gap: 5px; align-items: center;">
+                    ${actionHtml}
+                </div>
+            `;
 
-        if (userRole === 'osas' || userRole === 'admin') {
-            div.querySelector(".return-btn").addEventListener("click", (e) => {
-                e.stopPropagation();
-                handleReturn("document", doc.document_id, doc.document_name);
-            });
-        }
-        documentsElem.appendChild(div);
-    });
-}
+            if (userRole === 'osas' || userRole === 'admin') {
+                div.querySelector(".return-btn").addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    handleReturn("document", doc.document_id, doc.document_name);
+                });
+            }
+            documentsElem.appendChild(div);
+        });
+    }
 
+    // --- Modal ---
     function showModal(title, htmlContent) {
         modalTitle.textContent = title;
         modalContent.innerHTML = htmlContent;
@@ -259,106 +256,77 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal.onclick = () => modal.style.display = "none";
     window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
 
+    // --- Handle Return ---
     function handleReturn(type, id, name) {
-    // Set the Modal Title
-    const modalTitle = document.getElementById("modalTitle");
-    const modalContent = document.getElementById("modalContent");
-    const modal = document.getElementById("modal");
-
-    modalTitle.textContent = `Return ${type}: ${name}`;
-    
-    // Inject a textarea and a submit button into the modal content
-    modalContent.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <p>Please provide a reason for returning this ${type}:</p>
-            <textarea id="returnReasonText" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" placeholder="Enter reason here..."></textarea>
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button id="cancelReturn" style="padding: 8px 15px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
-                <button id="submitReturn" style="padding: 8px 15px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Return</button>
+        modalTitle.textContent = `Return ${type}: ${name}`;
+        modalContent.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <p>Please provide a reason for returning this ${type}:</p>
+                <textarea id="returnReasonText" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" placeholder="Enter reason here..."></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="cancelReturn" style="padding: 8px 15px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button id="submitReturn" style="padding: 8px 15px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Return</button>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+        modal.style.display = "flex";
 
-    // Show the Modal
-    modal.style.display = "flex";
+        document.getElementById("cancelReturn").onclick = () => { modal.style.display = "none"; };
+        document.getElementById("submitReturn").onclick = () => {
+            const reason = document.getElementById("returnReasonText").value.trim();
+            if (!reason) { alert("A reason is required to return an item."); return; }
 
-    // Handle Cancel
-    document.getElementById("cancelReturn").onclick = () => {
-        modal.style.display = "none";
-    };
-
-    // Handle Submit
-    document.getElementById("submitReturn").onclick = () => {
-        const reason = document.getElementById("returnReasonText").value.trim();
-        
-        if (!reason) {
-            alert("A reason is required to return an item.");
-            return;
-        }
-
-        // Perform the existing fetch call
-        fetch("../php/return_item.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                type: type, 
-                id: id, 
-                reason: reason 
+            fetch("../php/return_item.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type, id, reason })
             })
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.success) {
-                alert(`${type} has been returned.`);
-                modal.style.display = "none"; // Close modal
-                loadDashboardData(); // Refresh list
-            } else {
-                alert("Error: " + result.error);
-            }
-        })
-        .catch(err => console.error("Fetch error:", err));
-    };
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert(`${type} has been returned.`);
+                    modal.style.display = "none";
+                    loadDashboardData();
+                } else {
+                    alert("Error: " + result.error);
+                }
+            })
+            .catch(err => console.error("Fetch error:", err));
+        };
+    }
 
-        // --- Notification Polling ---
-    document.addEventListener("DOMContentLoaded", () => {
-        const notifBell = document.getElementById("bellIcon");
-        const notifCount = document.getElementById("notifCount");
+    // --- Notification Polling ---
+    const notifBell = document.getElementById("bellIcon");
+    const notifCount = document.getElementById("notifCount");
 
-        // Poll every 10 seconds
-        setInterval(checkReturnedNotifications, 10000); // 10000ms = 10s
-        checkReturnedNotifications(); // initial check on page load
+    function checkReturnedNotifications() {
+        fetch("../php/fetch_returned_items.php")
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return console.error(data.error);
 
-        function checkReturnedNotifications() {
-            fetch("../php/fetch_returned_items.php")
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) return console.error(data.error);
+                const returnedForOrg = data.items
+                    .filter(item => (item.type === 'document' || item.type === 'activity') && parseInt(item.org_id) === userOrgId);
 
-                    // Count returned items for this user's org
-                    const userOrgId = parseInt("<?php echo $_SESSION['org_id'] ?? 0; ?>", 10);
-                    const returnedForOrg = data.items.filter(item => item.type === 'document' || item.type === 'activity')
-                                                    .filter(item => parseInt(item.org_id) === userOrgId);
+                const count = returnedForOrg.length;
 
-                    const count = returnedForOrg.length;
+                if (count > 0) {
+                    notifCount.style.display = "inline-block";
+                    notifCount.textContent = count;
+                } else {
+                    notifCount.style.display = "none";
+                }
+            })
+            .catch(err => console.error("Notification fetch error:", err));
+    }
 
-                    if (count > 0) {
-                        notifCount.style.display = "inline-block";
-                        notifCount.textContent = count;
-                    } else {
-                        notifCount.style.display = "none";
-                    }
-                })
-                .catch(err => console.error("Notification fetch error:", err));
-        }
+    setInterval(checkReturnedNotifications, 10000);
+    checkReturnedNotifications();
 
-        // Click on bell redirects to returned files
-        notifBell.addEventListener("click", () => {
-            window.location.href = "returned.php";
-        });
+    notifBell.addEventListener("click", () => {
+        window.location.href = "returned.php";
     });
 
-    
-}
-
+    // --- Initial load ---
     loadDashboardData();
 });

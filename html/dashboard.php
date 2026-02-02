@@ -164,6 +164,7 @@ if ($userRole === 'osas') {
     </div>
   </div>
 
+<script> const userOrgId = <?php echo $_SESSION['org_id'] ?? 0; ?>; </script>
   <script src="../js/dashboard.js"></script>
 </body>
 </html>
