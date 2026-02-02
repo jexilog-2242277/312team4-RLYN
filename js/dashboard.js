@@ -216,13 +216,13 @@ document.addEventListener("DOMContentLoaded", () => {
         div.style = "padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;";
         
         let actionHtml = "";
-        if (userRole === 'osas' || userRole === 'admin') {
-            // Added Download button next to Return
-            actionHtml = `
-                <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
-                <button class="return-btn">Return</button>
-            `;
-        } else if (userRole === 'student') {
+        // Inside renderDocuments function
+            if (userRole === 'osas' || userRole === 'admin') {
+                actionHtml = `
+                    <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
+                    <button class="return-btn" data-id="${doc.document_id}">Return</button> 
+                `;
+            } else if (userRole === 'student') {
             const statusLabel = doc.visibility === 'public' ? 'Uploaded' : 'Uploaded';
             const statusColor = doc.visibility === 'public' ? '#33af3d' : '#33af3d';
             actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
@@ -241,12 +241,14 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-            if (userRole === 'osas' || userRole === 'admin') {
-                div.querySelector(".return-btn").addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    handleReturn("document", doc.document_id, doc.document_name);
-                });
-            }
+                    // Inside renderDocuments function, update the event listener
+        if (userRole === 'osas' || userRole === 'admin') {
+            div.querySelector(".return-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                // Use the doc object directly since it's available in the loop
+                handleReturn("document", doc.document_id, doc.document_name);
+            });
+        }
             documentsElem.appendChild(div);
         });
     }
