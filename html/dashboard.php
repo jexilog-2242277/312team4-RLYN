@@ -48,7 +48,6 @@ if ($userRole === 'osas') {
         </div>
         <?php endif; ?>
       
-        <input type="text" id="searchInput" class="search-input" placeholder="Search">
     </div>
       
       <input type="text" id="searchInput" class="search-input" placeholder="Search">
