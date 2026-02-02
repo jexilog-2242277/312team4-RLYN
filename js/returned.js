@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const editModalContent = document.getElementById("editModalContent");
     const closeEditModal = document.getElementById("closeEditModal");
 
-    // Close modal
     closeEditModal.onclick = () => editModal.style.display = "none";
     window.onclick = (event) => { if (event.target === editModal) editModal.style.display = "none"; };
 
@@ -16,19 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (!data.success) return console.error(data.error);
-
                 totalReturnedElem.textContent = data.items.length;
                 renderReturnedItems(data.items);
             });
     }
 
     function renderReturnedItems(items) {
-        returnedItemsElem.innerHTML = items.length ? "" : "<tr><td colspan='3' style='padding:20px; text-align:center;'>No returned items found.</td></tr>";
+        returnedItemsElem.innerHTML = items.length ? "" : 
+        "<tr><td colspan='3' style='padding:20px; text-align:center;'>No returned items found.</td></tr>";
 
         items.forEach(item => {
-            // Determine type
-            const type = item.doc_count !== undefined ? "activity" : "document";
-
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="width: 45%;">
@@ -51,41 +47,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td style="width: 15%;">
                     <div class="action-btn-container">
                         <button class="edit-btn" data-id="${item.activity_id}">Edit</button>
-                        <button class="resubmit-btn" data-id="${item.activity_id}" data-type="${type}">Resubmit</button>
+                        <button onclick="resubmitItem('activity', ${item.activity_id})">Resubmit</button>
                     </div>
                 </td>
             `;
             returnedItemsElem.appendChild(tr);
 
-            // Edit button
             tr.querySelector(".edit-btn").addEventListener("click", (e) => {
                 e.stopPropagation();
                 openEditModal(item);
-            });
-
-            // Resubmit button
-            tr.querySelector(".resubmit-btn").addEventListener("click", (e) => {
-                const id = e.target.getAttribute("data-id");
-                const type = e.target.getAttribute("data-type");
-
-                if (!confirm(`Are you sure you want to resubmit this ${type}?`)) return;
-
-                fetch("../php/resubmit_item.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ type: type, id: id })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} resubmitted successfully!`);
-                        e.target.closest("tr").remove();
-                        totalReturnedElem.textContent = parseInt(totalReturnedElem.textContent) - 1;
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                })
-                .catch(err => alert("Request failed: " + err));
             });
         });
     }
@@ -93,16 +63,35 @@ document.addEventListener("DOMContentLoaded", () => {
     function openEditModal(item) {
         editModalTitle.textContent = `Edit Activity: ${item.name}`;
 
+        // Academic year dropdown (last 10 years)
+        const currentYear = new Date().getFullYear();
+        let yearOptions = '';
+        for(let y = currentYear; y >= currentYear - 10; y--){
+            yearOptions += `<option value="${y}" ${item.academic_year == y ? 'selected' : ''}>${y}</option>`;
+        }
+
+        // SDG options (match dashboard.php)
+        const sdgList = [
+            "No Poverty","Zero Hunger","Good Health","Quality Education","Gender Equality",
+            "Clean Water","Affordable Energy","Decent Work","Industry & Innovation",
+            "Reduced Inequality","Sustainable Cities","Responsible Consumption",
+            "Climate Action","Life Below Water","Life on Land","Peace & Justice","Partnerships"
+        ];
+        let sdgOptions = '<option value="">Select SDG</option>';
+        sdgList.forEach(sdg => {
+            sdgOptions += `<option value="${sdg}" ${item.sdg_relation == sdg ? 'selected' : ''}>${sdg}</option>`;
+        });
+
         editModalContent.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <label>Name:</label>
                 <input type="text" id="editName" value="${item.name}" style="padding:5px;">
 
                 <label>Academic Year:</label>
-                <input type="text" id="editYear" value="${item.academic_year || ''}" style="padding:5px;">
+                <select id="editYear" style="padding:5px;">${yearOptions}</select>
 
                 <label>SDG:</label>
-                <input type="text" id="editSDG" value="${item.sdg_relation || ''}" style="padding:5px;">
+                <select id="editSDG" style="padding:5px;">${sdgOptions}</select>
 
                 <label>Description:</label>
                 <textarea id="editDescription" rows="4" style="padding:5px;">${item.description || ''}</textarea>
@@ -122,8 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const updatedData = {
                 id: item.activity_id,
                 name: document.getElementById("editName").value.trim(),
-                academic_year: document.getElementById("editYear").value.trim(),
-                sdg_relation: document.getElementById("editSDG").value.trim(),
+                academic_year: document.getElementById("editYear").value,
+                sdg_relation: document.getElementById("editSDG").value,
                 description: document.getElementById("editDescription").value.trim()
             };
 
@@ -148,3 +137,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadReturnedItems();
 });
+
+// Resubmit function for both activity and documents
+function resubmitItem(type, id) {
+    fetch("../php/resubmit_item.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ type, id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            alert(data.message);
+            location.reload(); // refresh page
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(err => console.error(err));
+}
