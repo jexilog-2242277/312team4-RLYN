@@ -19,13 +19,11 @@ try {
                              (SELECT COUNT(*) FROM documents d WHERE d.activity_id = a.activity_id) as doc_count
                       FROM activities a
                       WHERE a.status = 'returned'";
-    
     $activityParams = [];
     if ($userRole === 'student' && $orgId) {
         $activityQuery .= " AND a.org_id = $1";
         $activityParams[] = $orgId;
     }
-
     $activityResult = pg_query_params($conn, $activityQuery, $activityParams);
     while ($row = pg_fetch_assoc($activityResult)) {
         $row['type'] = 'activity';
@@ -33,16 +31,14 @@ try {
     }
 
     // --- Fetch returned documents ---
-    $docQuery = "SELECT d.document_id as id, d.doc_name as name, d.file_path, d.return_reason
+    $docQuery = "SELECT d.document_id as id, d.document_name as name, d.document_file_path, d.activity_id, d.return_reason
                  FROM documents d
                  WHERE d.status = 'returned'";
-    
     $docParams = [];
     if ($userRole === 'student' && $orgId) {
         $docQuery .= " AND d.org_id = $1";
         $docParams[] = $orgId;
     }
-
     $docResult = pg_query_params($conn, $docQuery, $docParams);
     while ($row = pg_fetch_assoc($docResult)) {
         $row['type'] = 'document';
@@ -50,7 +46,6 @@ try {
     }
 
     echo json_encode(["success" => true, "items" => $items]);
-
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
