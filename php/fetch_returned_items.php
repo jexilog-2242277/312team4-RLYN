@@ -23,6 +23,7 @@ try {
             a.academic_year,
             a.sdg_relation,
             a.return_reason,
+            a.org_id,
             (SELECT COUNT(*) FROM documents d WHERE d.activity_id = a.activity_id) AS doc_count
         FROM activities a
         WHERE a.status = 'returned'
@@ -37,7 +38,6 @@ try {
     while ($row = pg_fetch_assoc($activityResult)) {
         $row['type'] = 'activity';
         $items[] = $row;
-        $row['org_id'] = $row['org_id']; 
     }
 
     // --- Fetch returned documents ---
@@ -47,7 +47,8 @@ try {
             d.document_name AS name,
             d.document_file_path,
             d.activity_id,
-            d.return_reason
+            d.return_reason,
+            d.org_id
         FROM documents d
         WHERE d.status = 'returned'
     ";
@@ -60,7 +61,6 @@ try {
     $docResult = pg_query_params($conn, $docQuery, $docParams);
     while ($row = pg_fetch_assoc($docResult)) {
         $row['type'] = 'document';
-        $row['org_id'] = $row['org_id'];
         $row['description'] = "";
         $row['academic_year'] = "";
         $row['sdg_relation'] = "";
