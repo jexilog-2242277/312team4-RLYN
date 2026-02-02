@@ -12,23 +12,45 @@ $userRole = $_SESSION['role'] ?? 'student';
 $orgId = $_SESSION['org_id'] ?? null;
 
 try {
-    // Only fetch items where status is 'returned'
-    // For students, filter by their specific org_id
-    $query = "SELECT a.activity_id, a.name, a.academic_year, a.sdg_relation, a.return_reason, 
-              (SELECT COUNT(*) FROM documents d WHERE d.activity_id = a.activity_id) as doc_count
-              FROM activities a 
-              WHERE a.status = 'returned'";
+    $items = [];
+
+    // --- Fetch returned activities ---
+    $activityQuery = "SELECT a.activity_id as id, a.name, a.description, a.academic_year, a.sdg_relation, a.return_reason,
+                             (SELECT COUNT(*) FROM documents d WHERE d.activity_id = a.activity_id) as doc_count
+                      FROM activities a
+                      WHERE a.status = 'returned'";
     
-    $params = [];
+    $activityParams = [];
     if ($userRole === 'student' && $orgId) {
-        $query .= " AND a.org_id = $1";
-        $params[] = $orgId;
+        $activityQuery .= " AND a.org_id = $1";
+        $activityParams[] = $orgId;
     }
 
-    $result = pg_query_params($conn, $query, $params);
-    $items = pg_fetch_all($result) ?: [];
+    $activityResult = pg_query_params($conn, $activityQuery, $activityParams);
+    while ($row = pg_fetch_assoc($activityResult)) {
+        $row['type'] = 'activity';
+        $items[] = $row;
+    }
+
+    // --- Fetch returned documents ---
+    $docQuery = "SELECT d.document_id as id, d.doc_name as name, d.file_path, d.return_reason
+                 FROM documents d
+                 WHERE d.status = 'returned'";
+    
+    $docParams = [];
+    if ($userRole === 'student' && $orgId) {
+        $docQuery .= " AND d.org_id = $1";
+        $docParams[] = $orgId;
+    }
+
+    $docResult = pg_query_params($conn, $docQuery, $docParams);
+    while ($row = pg_fetch_assoc($docResult)) {
+        $row['type'] = 'document';
+        $items[] = $row;
+    }
 
     echo json_encode(["success" => true, "items" => $items]);
+
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
