@@ -329,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "returned.php";
     });
 
-    // --- Initial load ---
+    setInterval(loadDashboardData, 10000);
     loadDashboardData();
+
 });
