@@ -318,6 +318,46 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(err => console.error("Fetch error:", err));
     };
+
+        // --- Notification Polling ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const notifBell = document.getElementById("bellIcon");
+        const notifCount = document.getElementById("notifCount");
+
+        // Poll every 10 seconds
+        setInterval(checkReturnedNotifications, 10000); // 10000ms = 10s
+        checkReturnedNotifications(); // initial check on page load
+
+        function checkReturnedNotifications() {
+            fetch("../php/fetch_returned_items.php")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return console.error(data.error);
+
+                    // Count returned items for this user's org
+                    const userOrgId = parseInt("<?php echo $_SESSION['org_id'] ?? 0; ?>", 10);
+                    const returnedForOrg = data.items.filter(item => item.type === 'document' || item.type === 'activity')
+                                                    .filter(item => parseInt(item.org_id) === userOrgId);
+
+                    const count = returnedForOrg.length;
+
+                    if (count > 0) {
+                        notifCount.style.display = "inline-block";
+                        notifCount.textContent = count;
+                    } else {
+                        notifCount.style.display = "none";
+                    }
+                })
+                .catch(err => console.error("Notification fetch error:", err));
+        }
+
+        // Click on bell redirects to returned files
+        notifBell.addEventListener("click", () => {
+            window.location.href = "returned.php";
+        });
+    });
+
+    
 }
 
     loadDashboardData();
