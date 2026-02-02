@@ -37,6 +37,7 @@ try {
     while ($row = pg_fetch_assoc($activityResult)) {
         $row['type'] = 'activity';
         $items[] = $row;
+        $row['org_id'] = $row['org_id']; 
     }
 
     // --- Fetch returned documents ---
@@ -59,7 +60,7 @@ try {
     $docResult = pg_query_params($conn, $docQuery, $docParams);
     while ($row = pg_fetch_assoc($docResult)) {
         $row['type'] = 'document';
-        // For consistency with activities, add placeholders for missing fields
+        $row['org_id'] = $row['org_id'];
         $row['description'] = "";
         $row['academic_year'] = "";
         $row['sdg_relation'] = "";

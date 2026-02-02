@@ -300,24 +300,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const notifCount = document.getElementById("notifCount");
 
     function checkReturnedNotifications() {
-        fetch("../php/fetch_returned_items.php")
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) return console.error(data.error);
+    fetch("../php/fetch_returned_items.php")
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return console.error(data.error);
 
-                const returnedForOrg = data.items
-                    .filter(item => (item.type === 'document' || item.type === 'activity') && parseInt(item.org_id) === userOrgId);
+            const returnedForOrg = data.items
+                .filter(item => item.type === 'document' || item.type === 'activity')
+                .filter(item => parseInt(item.org_id) === userOrgId);
 
-                const count = returnedForOrg.length;
+            const count = returnedForOrg.length;
 
-                if (count > 0) {
-                    notifCount.style.display = "inline-block";
-                    notifCount.textContent = count;
-                } else {
-                    notifCount.style.display = "none";
-                }
-            })
-            .catch(err => console.error("Notification fetch error:", err));
+            const notifCount = document.getElementById("notifCount");
+            if (count > 0) {
+                notifCount.style.display = "inline-block";
+                notifCount.textContent = count;
+            } else {
+                notifCount.style.display = "none";
+            }
+        })
+        .catch(err => console.error("Notification fetch error:", err));
     }
 
     setInterval(checkReturnedNotifications, 10000);
