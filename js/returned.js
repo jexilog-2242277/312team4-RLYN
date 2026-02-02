@@ -142,37 +142,83 @@ function openActivityModal(item) {
 }
 
 
-    // --- Document Modal ---
     function openDocumentModal(doc) {
-        editModalTitle.textContent = `Resubmit Document: ${doc.name}`;
-        editModalContent.innerHTML = `
-            <form id="resubmitDocForm">
-                <input type="file" name="file" required>
-                <input type="hidden" name="document_id" value="${doc.id}">
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
-                    <button type="button" id="cancelDoc" style="padding:5px 10px; background:#ccc; border:none; border-radius:4px;">Cancel</button>
-                    <button type="submit" style="padding:5px 10px; background:#28a745; color:white; border:none; border-radius:4px;">Resubmit</button>
-                </div>
-            </form>
-        `;
+    editModalTitle.textContent = `Returned Document: ${doc.name}`;
 
-        editModal.style.display = "flex";
-        document.getElementById("cancelDoc").onclick = () => editModal.style.display = "none";
+    // Build file URL using backend field
+    const fileUrl = `../uploads/documents/${doc.document_file_path}`;
 
-        document.getElementById("resubmitDocForm").onsubmit = (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            fetch("../php/upload_returned_document.php", { method: "POST", body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success){
-                        alert(data.message);
-                        editModal.style.display = "none";
-                        loadReturnedItems();
-                    } else alert(data.error);
-                });
-        };
-    }
+    // Check if PDF (optional but recommended)
+    const isPDF = doc.document_file_path.toLowerCase().endsWith('.pdf');
+
+    editModalContent.innerHTML = `
+        <div style="margin-bottom:12px;">
+            <strong>Current Document:</strong><br>
+
+            ${
+                isPDF
+                ? `<iframe 
+                        src="${fileUrl}" 
+                        style="width:100%; height:300px; border:1px solid #ccc; border-radius:4px;"
+                   ></iframe>`
+                : `<p style="font-size:13px; color:#555;">
+                        Preview not available for this file type.
+                   </p>`
+            }
+
+            <a href="${fileUrl}" target="_blank"
+               style="display:inline-block; margin-top:6px; color:#0E0465; font-weight:bold;">
+               Open in New Tab
+            </a>
+        </div>
+
+        <hr>
+
+        <form id="resubmitDocForm" enctype="multipart/form-data">
+            <label>Upload New Version:</label>
+            <input type="file" name="file" required>
+            <input type="hidden" name="document_id" value="${doc.id}">
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+                <button type="button" id="cancelDoc"
+                    style="background:#ccc; border:none; padding:5px 10px; border-radius:4px;">
+                    Cancel
+                </button>
+                <button type="submit"
+                    style="background:#28a745; color:white; border:none; padding:5px 10px; border-radius:4px;">
+                    Resubmit
+                </button>
+            </div>
+        </form>
+    `;
+
+    editModal.style.display = "flex";
+
+    document.getElementById("cancelDoc").onclick = () => {
+        editModal.style.display = "none";
+    };
+
+    document.getElementById("resubmitDocForm").onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        fetch("../php/upload_returned_document.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                editModal.style.display = "none";
+                loadReturnedItems();
+            } else {
+                alert(data.error);
+            }
+        });
+    };
+}
+
 
     loadReturnedItems();
 });

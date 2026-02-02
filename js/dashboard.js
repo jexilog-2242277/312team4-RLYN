@@ -217,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         let actionHtml = "";
         if (userRole === 'osas' || userRole === 'admin') {
-            // Changed "Download" to "View" and added target="_blank"
             actionHtml = `
                 <a href="../uploads/documents/${doc.document_file_path}" target="_blank" class="view-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">View</a>
                 <button class="return-btn" data-id="${doc.document_id}" style="padding: 5px 10px; background: #f39c12; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 5px;">Return</button> 
