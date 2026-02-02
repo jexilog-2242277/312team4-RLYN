@@ -52,14 +52,21 @@ try {
             $docQuery = "INSERT INTO documents 
                          (org_id, activity_id, document_name, document_type, uploaded_at, document_file_path, uploaded_by, status) 
                          VALUES ($1, $2, $3, $4, NOW(), $5, $6, 'submitted')";
+            // Get activity org_id
+            $orgIdResult = pg_query_params($conn, "SELECT org_id FROM activities WHERE activity_id=$1", [$id]);
+            if (!$orgIdResult) throw new Exception(pg_last_error($conn));
+            $orgId = pg_fetch_result($orgIdResult, 0, 'org_id');
+
+            // Insert document record
             $docResult = pg_query_params($conn, $docQuery, [
-                $_SESSION['user_id'], 
-                $id, 
-                $file['name'], 
-                mime_content_type($targetPath), 
-                $filename, 
-                $_SESSION['user_id']
+                $orgId,              // Correct org_id from activity
+                $id,                 // activity_id
+                $file['name'],       // document_name
+                mime_content_type($targetPath), // document_type
+                $filename,           // document_file_path
+                $_SESSION['user_id'] // uploaded_by
             ]);
+
 
             if (!$docResult) throw new Exception(pg_last_error($conn));
         }
