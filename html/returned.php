@@ -7,13 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Determine the Dashboard Title based on Role
 $userRole = $_SESSION['role'] ?? 'organization'; 
-$dashboardTitle = "";
-
-if ($userRole === 'osas') {
-    $dashboardTitle = "";
-} elseif ($userRole === 'admin') {
-    $dashboardTitle = "Admin Dashboard";
-}
+$dashboardTitle = $userRole === 'admin' ? "Admin Dashboard" : "";
 ?>
 
 <!DOCTYPE html>
@@ -24,31 +18,21 @@ if ($userRole === 'osas') {
   <link rel="stylesheet" href="../css/dashboardstyle.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
-    /* --- Table Styling --- */
     .returned-table { width: 100%; border-collapse: collapse; background: #fff; }
     .returned-table td { padding: 20px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
 
-    /* --- Custom Header Replacement --- */
     .table-header-row {
         background-color: #0E0465;
         display: flex;
         padding: 12px 15px;
         border-radius: 8px 8px 0 0;
     }
-    .header-item {
-        color: white;
-        font-weight: bold;
-        font-size: 14px;
-        text-transform: none;
-    }
+    .header-item { color: white; font-weight: bold; font-size: 14px; }
 
-    /* --- Activity/Document Item Layout --- */
     .activity-info-box { display: flex; flex-direction: column; gap: 6px; }
-    .activity-two-col { display: flex; justify-content: flex-start; gap: 30px; }
+    .activity-two-col { display: flex; gap: 30px; }
     .activity-two-col div { font-size: 13px; color: #333; min-width: 150px; }
-    .activity-two-col strong { color: #000; }
 
-    /* --- Reason Column --- */
     .reason-box { 
         background-color: #fffafa; 
         border-left: 3px solid #dc3545; 
@@ -57,101 +41,62 @@ if ($userRole === 'osas') {
         color: #d93025; 
         font-size: 13px; 
         font-style: italic;
-        line-height: 1.5;
     }
 
-    /* --- Action Buttons --- */
-    .action-btn-container { 
-        display: flex; 
-        gap: 5px; 
-        justify-content: flex-end; 
-        padding-right: 10px; 
-    }
+    .action-btn-container { display: flex; gap: 5px; justify-content: flex-end; }
   </style>
 </head>
 <body>
-
-  <header class="header">
+<header class="header">
     <div class="header-nav">
       <?php include '../includes/header.php'; ?>
-      <span style="color: white; font-weight: bold; margin-left: 15px; font-size: 1.2rem;">
-        <?php echo $dashboardTitle; ?>
-      </span>
+      <span style="color: white; font-weight: bold; margin-left: 15px;"><?php echo $dashboardTitle; ?></span>
     </div>
-    
-    <div class="search-container">
-      <div class="notification-wrapper">
-          <div class="bell-trigger" id="bellIcon">
-              <span class="material-icons">notifications</span>
-          </div>
+</header>
+
+<div class="main-container">
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="dashboard.php">Dashboard</a></li>
+        <li><a href="create.php">Create Activity</a></li>
+        <li><a href="upload.php">Upload Documents</a></li>
+        <li><a href="returned.php" class="active">Returned Files</a></li>
+        <li><a href="../php/logout.php">Logout</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <section class="content-area">
+    <div class="card combined-card" style="padding: 0; background: transparent; border: none;">
+      <div class="table-header-row">
+          <div class="header-item" style="flex: 4.5;">Name / Details</div>
+          <div class="header-item" style="flex: 4;">Reason for Return</div>
+          <div class="header-item" style="flex: 1.5; text-align: right; padding-right: 20px;">Actions</div>
       </div>
-      <input type="text" id="searchInput" class="search-input" placeholder="Search">
+
+      <div class="tab-content" style="padding: 0; background: #fff; border: 1px solid #0E0465; border-top: none; border-radius: 0 0 8px 8px;">
+        <div class="activities-content">
+          <table class="returned-table">
+            <tbody id="returnedItems"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </header>
+  </section>
+</div>
 
-  <div class="main-container">
-    <aside class="sidebar">
-      <nav class="sidebar-nav">
-        <ul>
-          <li><a href="dashboard.php">Dashboard</a></li>
-          <li><a href="create.php">Create Activity</a></li>
-          <li><a href="upload.php">Upload Documents</a></li>
-          <li><a href="returned.php" class="active">Returned Files</a></li>
-          <li><a href="../php/logout.php">Logout</a></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <section class="content-area">
-      <div class="stats-grid">
-        <div class="filter">
-          <div class="filter-controls">
-            <button type="button" class="filter-btn active" id="btnAll">All</button>
-            <button type="button" class="filter-btn" id="btnOrg">Org</button>
-            <button type="button" class="filter-btn" id="btnYear">Year</button>
-            <button type="button" class="filter-btn" id="btnSDG">SDGs</button>
-            <button type="button" class="filter-btn apply-btn" id="btnApply" style="margin-left: 20px; background-color: #28a745; color: white;">Apply</button>
-            <button type="button" class="filter-btn clear-btn" id="btnClear" style="background-color: #dc3545; color: white;">Clear</button>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <p>Returned Total</p>
-          <p class="stat-number" id="totalReturned">0</p>
-        </div>
-      </div>
-
-      <div class="card combined-card" style="padding: 0; background: transparent; border: none;">
-        <div class="table-header-row">
-            <div class="header-item" style="flex: 4.5;">Activity/Document Details</div>
-            <div class="header-item" style="flex: 4;">Reason for Return</div>
-            <div class="header-item" style="flex: 1.5; text-align: right; padding-right: 20px;">Actions</div>
-        </div>
-
-        <div class="tab-content" style="padding: 0; background: #fff; border: 1px solid #0E0465; border-top: none; border-radius: 0 0 8px 8px;">
-          <div class="activities-content">
-            <table class="returned-table">
-                <tbody id="returnedItems">
-                <!-- Returned items will be loaded here by returned.js -->
-                </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script src="../js/dashboard.js"></script>
-  <script src="../js/returned.js"></script>
-
-  <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+<!-- Edit / Resubmit Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
     background: rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:2000;">
-    <div style="background:#fff; padding:20px; border-radius:10px; width:450px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-        <h3 id="editModalTitle" style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;">Edit Activity</h3>
-        <div id="editModalContent" style="line-height:1.6; color:#333;"></div>
-        <button id="closeEditModal" style="margin-top:20px; padding:8px 20px; cursor:pointer; background:#0E0465; color:white; border:none; border-radius:4px;">Close</button>
-    </div>
+  <div style="background:#fff; padding:20px; border-radius:10px; width:450px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+      <h3 id="editModalTitle" style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;"></h3>
+      <div id="editModalContent" style="line-height:1.6; color:#333;"></div>
+      <button id="closeEditModal" style="margin-top:20px; padding:8px 20px; cursor:pointer; background:#0E0465; color:white; border:none; border-radius:4px;">Close</button>
   </div>
+</div>
 
+<script src="../js/dashboard.js"></script>
+<script src="../js/returned.js"></script>
 </body>
 </html>

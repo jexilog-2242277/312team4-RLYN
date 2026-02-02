@@ -35,11 +35,7 @@ if ($userRole === 'osas') {
     </div>
     
     <div class="search-container">
-      <div class="notification-wrapper">
-          <div class="bell-trigger" id="bellIcon">
-              <span class="material-icons">notifications</span>
-          </div>
-      </div>
+    
       <input type="text" id="searchInput" class="search-input" placeholder="Search">
     </div>
   </header>
