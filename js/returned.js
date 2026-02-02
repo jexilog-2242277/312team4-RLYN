@@ -10,11 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function loadReturnedItems() {
         fetch("../php/fetch_returned_items.php")
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) return console.error(data.error);
-            renderReturnedItems(data.items);
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return console.error(data.error);
+                renderReturnedItems(data.items);
+            });
     }
 
     function renderReturnedItems(items) {
@@ -51,21 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td style="width:40%;"><div class="reason-box">"${item.return_reason || 'No reason'}"</div></td>
                 <td style="width:15%;">
                     <div class="action-btn-container">
-                        <button class="edit-btn">Edit</button>
-                        <button class="resubmit-btn">${item.type === 'activity' ? 'Resubmit' : 'Resubmit Document'}</button>
+                        <button class="edit-btn">${item.type === 'activity' ? 'Edit' : 'Resubmit Document'}</button>
                     </div>
                 </td>
             `;
             returnedItemsElem.appendChild(tr);
 
-            // Edit
+            // Edit / Resubmit
             tr.querySelector(".edit-btn").addEventListener("click", () => {
-                if(item.type === 'activity') openActivityModal(item);
-                else openDocumentModal(item);
-            });
-
-            // Resubmit
-            tr.querySelector(".resubmit-btn").addEventListener("click", () => {
                 if(item.type === 'activity') openActivityModal(item);
                 else openDocumentModal(item);
             });
@@ -76,57 +69,58 @@ document.addEventListener("DOMContentLoaded", () => {
     function openActivityModal(item) {
         editModalTitle.textContent = `Edit Activity: ${item.name}`;
         editModalContent.innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <label>Name:</label>
-                <input type="text" id="editName" value="${item.name}" style="padding:5px;">
+            <form id="editActivityForm">
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label>Name:</label>
+                    <input type="text" name="name" value="${item.name}" style="padding:5px;">
 
-                <label>Academic Year:</label>
-                <select id="editYear" style="padding:5px;">
-                    <option value="2022-2023" ${item.academic_year === '2022-2023' ? 'selected' : ''}>2022-2023</option>
-                    <option value="2023-2024" ${item.academic_year === '2023-2024' ? 'selected' : ''}>2023-2024</option>
-                    <option value="2024-2025" ${item.academic_year === '2024-2025' ? 'selected' : ''}>2024-2025</option>
-                </select>
+                    <label>Academic Year:</label>
+                    <select name="academic_year" style="padding:5px;">
+                        <option value="2022-2023" ${item.academic_year === '2022-2023' ? 'selected' : ''}>2022-2023</option>
+                        <option value="2023-2024" ${item.academic_year === '2023-2024' ? 'selected' : ''}>2023-2024</option>
+                        <option value="2024-2025" ${item.academic_year === '2024-2025' ? 'selected' : ''}>2024-2025</option>
+                    </select>
 
-                <label>SDG:</label>
-                <select id="editSDG" style="padding:5px;">
-                    ${[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].map(n => `<option value="${n}" ${item.sdg_relation == n ? 'selected' : ''}>SDG ${n}</option>`).join('')}
-                </select>
+                    <label>SDG:</label>
+                    <select name="sdg_relation" style="padding:5px;">
+                        ${[...Array(17).keys()].map(n => {
+                            const num = n + 1;
+                            return `<option value="${num}" ${item.sdg_relation == num ? 'selected' : ''}>SDG ${num}</option>`;
+                        }).join('')}
+                    </select>
 
-                <label>Description:</label>
-                <textarea id="editDescription" rows="4" style="padding:5px;">${item.description || ''}</textarea>
+                    <label>Description:</label>
+                    <textarea name="description" rows="4" style="padding:5px;">${item.description || ''}</textarea>
 
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
-                    <button id="cancelEdit" style="padding:5px 10px; background:#ccc; border:none; border-radius:4px;">Cancel</button>
-                    <button id="submitEdit" style="padding:5px 10px; background:#28a745; color:white; border:none; border-radius:4px;">Save & Resubmit</button>
+                    <label>Attach File (optional):</label>
+                    <input type="file" name="file">
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                        <button type="button" id="cancelEdit" style="padding:5px 10px; background:#ccc; border:none; border-radius:4px;">Cancel</button>
+                        <button type="submit" style="padding:5px 10px; background:#28a745; color:white; border:none; border-radius:4px;">Save & Resubmit</button>
+                    </div>
                 </div>
-            </div>
+            </form>
         `;
 
         editModal.style.display = "flex";
         document.getElementById("cancelEdit").onclick = () => editModal.style.display = "none";
 
-        document.getElementById("submitEdit").onclick = () => {
-            const updated = {
-                id: item.id,
-                name: document.getElementById("editName").value.trim(),
-                academic_year: document.getElementById("editYear").value,
-                sdg_relation: document.getElementById("editSDG").value,
-                description: document.getElementById("editDescription").value.trim(),
-                type: 'activity'
-            };
-            fetch("../php/resubmit_item.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updated)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    alert(data.message);
-                    editModal.style.display = "none";
-                    loadReturnedItems();
-                } else alert(data.error);
-            });
+        document.getElementById("editActivityForm").onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            formData.append('id', item.id);
+            formData.append('type', 'activity');
+
+            fetch("../php/resubmit_item.php", { method: "POST", body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success){
+                        alert(data.message);
+                        editModal.style.display = "none";
+                        loadReturnedItems();
+                    } else alert(data.error);
+                });
         };
     }
 
@@ -151,14 +145,14 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const formData = new FormData(e.target);
             fetch("../php/upload_returned_document.php", { method: "POST", body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    alert(data.message);
-                    editModal.style.display = "none";
-                    loadReturnedItems();
-                } else alert(data.error);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success){
+                        alert(data.message);
+                        editModal.style.display = "none";
+                        loadReturnedItems();
+                    } else alert(data.error);
+                });
         };
     }
 
