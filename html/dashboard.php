@@ -57,7 +57,7 @@ if ($userRole === 'osas') {
     <ul>
       <li><a href="dashboard.php" class="active">Dashboard</a></li>
       
-      <?php if ($userRole === 'student'): ?>
+      <?php if ($userRole === 'student' || $userRole === 'adviser'): ?>
           <li><a href="create.php">Create Activity</a></li>
           <li><a href="upload.php">Upload Documents</a></li>
           <li><a href="returned.php">Returned Files</a></li>
