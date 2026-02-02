@@ -153,8 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .catch(err => console.error("Fetch error:", err));
     
-        setInterval(loadDashboardData, 10000);
-        loadDashboardData();
 
     }
 
@@ -327,9 +325,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setInterval(checkReturnedNotifications, 10000);
-    checkReturnedNotifications();
 
-        loadDashboardData();
+    loadDashboardData();
+    setInterval(loadDashboardData, 10000);
 
     notifBell.addEventListener("click", () => {
         window.location.href = "returned.php";
