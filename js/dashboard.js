@@ -223,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="return-btn">Return</button>
             `;
         } else if (userRole === 'student') {
-            const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Uploaded';
-            const statusColor = doc.visibility === 'public' ? '#0E0465' : '#33af3d';
+            const statusLabel = doc.visibility === 'public' ? 'Uploaded' : 'Uploaded';
+            const statusColor = doc.visibility === 'public' ? '#33af3d' : '#33af3d';
             actionHtml = `<span style="font-weight: bold; color: ${statusColor};">${statusLabel}</span>`;
         }
 
