@@ -329,10 +329,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(checkReturnedNotifications, 10000);
     checkReturnedNotifications();
 
+        loadDashboardData();
+
     notifBell.addEventListener("click", () => {
         window.location.href = "returned.php";
     });
 
-    loadDashboardData();
 
 });
