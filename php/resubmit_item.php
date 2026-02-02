@@ -3,89 +3,92 @@ session_start();
 header('Content-Type: application/json');
 require_once "../includes/db_connect.php";
 
-// Only allow authorized roles
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['student', 'adviser'])) {
-    echo json_encode(["success" => false, "error" => "Unauthorized"]);
+// --- Config ---
+$uploadDir = '../uploads/documents/'; 
+if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(["success" => false, "message" => "Authentication failed."]);
     exit;
 }
 
-// Determine input type
 $type = $_POST['type'] ?? '';
 $id = $_POST['id'] ?? null;
 
 if (!$type || !$id) {
-    echo json_encode(["success" => false, "error" => "Missing required information"]);
+    echo json_encode(["success" => false, "message" => "Missing type or ID."]);
     exit;
 }
 
 try {
     if ($type === 'activity') {
-        // Collect activity fields
+        // Collect form data
         $name = $_POST['name'] ?? '';
         $academic_year = $_POST['academic_year'] ?? '';
         $sdg_relation = $_POST['sdg_relation'] ?? '';
         $description = $_POST['description'] ?? '';
 
-        // Update activity
-        $query = "UPDATE activities 
-                  SET name=$1, academic_year=$2, sdg_relation=$3, description=$4, status='submitted', return_reason=NULL
-                  WHERE activity_id=$5";
-        $result = pg_query_params($conn, $query, [$name, $academic_year, $sdg_relation, $description, $id]);
+        // Update activity info
+        $updateQuery = "
+            UPDATE activities 
+            SET name=$1, academic_year=$2, sdg_relation=$3, description=$4, status='submitted', return_reason=NULL
+            WHERE activity_id=$5
+        ";
+        $res = pg_query_params($conn, $updateQuery, [$name, $academic_year, $sdg_relation, $description, $id]);
+        if (!$res) throw new Exception(pg_last_error($conn));
 
-        if (!$result) throw new Exception(pg_last_error($conn));
+        // Get org_id from activity (for documents)
+        $orgRes = pg_query_params($conn, "SELECT org_id FROM activities WHERE activity_id=$1", [$id]);
+        if (!$orgRes) throw new Exception("Failed to fetch org_id.");
+        $orgId = pg_fetch_result($orgRes, 0, 'org_id');
 
         // Handle optional file upload
-        if (!empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['file'];
-            $uploadDir = "../uploads/activities/";
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['file']['tmp_name'];
+            $originalFileName = basename($_FILES['file']['name']);
+            $fileType = $_FILES['file']['type'];
 
-            $timestamp = time();
-            $filename = $timestamp . "_" . basename($file['name']);
-            $targetPath = $uploadDir . $filename;
+            $fileBase = preg_replace("/[^a-zA-Z0-9_-]/", "_", pathinfo($originalFileName, PATHINFO_FILENAME));
+            $timestamp = date("Ymd_His");
+            $newFileName = $fileBase . '_' . $timestamp . '.' . pathinfo($originalFileName, PATHINFO_EXTENSION);
+            $destPath = $uploadDir . $newFileName;
 
-            if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-                throw new Exception("Failed to upload file");
+            if (!move_uploaded_file($fileTmpPath, $destPath)) {
+                throw new Exception("Failed to move uploaded file.");
             }
 
             // Insert document record
-            $docQuery = "INSERT INTO documents 
-                         (org_id, activity_id, document_name, document_type, uploaded_at, document_file_path, uploaded_by, status) 
-                         VALUES ($1, $2, $3, $4, NOW(), $5, $6, 'submitted')";
-            // Get activity org_id
-            $orgIdResult = pg_query_params($conn, "SELECT org_id FROM activities WHERE activity_id=$1", [$id]);
-            if (!$orgIdResult) throw new Exception(pg_last_error($conn));
-            $orgId = pg_fetch_result($orgIdResult, 0, 'org_id');
-
-            // Insert document record
-            $docResult = pg_query_params($conn, $docQuery, [
-                $orgId,              // Correct org_id from activity
-                $id,                 // activity_id
-                $file['name'],       // document_name
-                mime_content_type($targetPath), // document_type
-                $filename,           // document_file_path
-                $_SESSION['user_id'] // uploaded_by
+            $docQuery = "
+                INSERT INTO documents 
+                (org_id, activity_id, document_name, document_file_path, document_type, uploaded_by, status) 
+                VALUES ($1, $2, $3, $4, $5, $6, 'submitted')
+            ";
+            $docRes = pg_query_params($conn, $docQuery, [
+                $orgId,
+                $id,
+                $originalFileName,
+                $newFileName,
+                $fileType,
+                $_SESSION['user_id']
             ]);
-
-
-            if (!$docResult) throw new Exception(pg_last_error($conn));
+            if (!$docRes) throw new Exception("Failed to insert document into DB.");
         }
 
-        echo json_encode(["success" => true, "message" => "Activity resubmitted successfully"]);
+        echo json_encode(["success" => true, "message" => "Activity updated and resubmitted successfully."]);
 
     } elseif ($type === 'document') {
-        // Update document status only
-        $query = "UPDATE documents SET status='submitted', return_reason=NULL WHERE document_id=$1";
-        $result = pg_query_params($conn, $query, [$id]);
+        // Resubmit document only
+        $docQuery = "UPDATE documents SET status='submitted', return_reason=NULL WHERE document_id=$1";
+        $res = pg_query_params($conn, $docQuery, [$id]);
+        if (!$res) throw new Exception(pg_last_error($conn));
 
-        if (!$result) throw new Exception(pg_last_error($conn));
-
-        echo json_encode(["success" => true, "message" => "Document resubmitted successfully"]);
-
+        echo json_encode(["success" => true, "message" => "Document resubmitted successfully."]);
     } else {
-        throw new Exception("Invalid type");
+        throw new Exception("Invalid type.");
     }
 
-} catch(Exception $e) {
-    echo json_encode(["success" => false, "error" => $e->getMessage()]);
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
+
+pg_close($conn);
