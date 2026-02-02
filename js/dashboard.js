@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Content Manipulation: Toggling buttons vs status labels
             let actionHtml = "";
             if (userRole === 'osas' || userRole === 'admin') {
-                actionHtml = `<button class="delete-btn" data-id="${act.activity_id}">Delete</button>`;
+                actionHtml = `<button class="return-btn" data-id="${act.activity_id}" data-name="${act.name}">Return</button>`;
             } else if (userRole === 'student') {
                 actionHtml = `<span style="color: #28a745; font-weight: bold;">Submitted</span>`;
             }
@@ -190,9 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             
             if (userRole === 'osas' || userRole === 'admin') {
-                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                div.querySelector(".return-btn").addEventListener("click", (e) => {
                     e.stopPropagation();
-                    handleDelete("activity", act.activity_id, act.name);
+                    openReturnModal("activity", act.activity_id, act.name);
                 });
             }
 
@@ -217,10 +217,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         let actionHtml = "";
         if (userRole === 'osas' || userRole === 'admin') {
-            // Added Download button next to Delete
+            // Added Download button next to Return
             actionHtml = `
                 <a href="../uploads/documents/${doc.document_file_path}" download="${doc.document_name}" class="download-btn" style="text-decoration: none; padding: 5px 10px; background: #28a745; color: white; border-radius: 4px; font-size: 12px;">Download</a>
-                <button class="delete-btn">Delete</button>
+                <button class="return-btn" data-id="${doc.document_id}" data-name="${doc.document_name}">Return</button>
             `;
         } else if (userRole === 'student') {
             const statusLabel = doc.visibility === 'public' ? 'Pending' : 'Submitted';
@@ -242,9 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
             if (userRole === 'osas' || userRole === 'admin') {
-                div.querySelector(".delete-btn").addEventListener("click", (e) => {
+                div.querySelector(".return-btn").addEventListener("click", (e) => {
                     e.stopPropagation();
-                    handleDelete("document", doc.document_id, doc.document_name);
+                    openReturnModal("document", doc.document_id, doc.document_name);
                 });
             }
             documentsElem.appendChild(div);
@@ -260,23 +260,76 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal.onclick = () => modal.style.display = "none";
     window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
 
-    function handleDelete(type, id, name) {
-        if (!confirm(`Are you sure you want to delete ${type} "${name}"?`)) return;
-        fetch("../php/delete_activity.php", {
+    // Modal for Return functionality
+    const returnModalOverlay = document.createElement("div");
+    returnModalOverlay.id = "returnModalOverlay";
+    returnModalOverlay.style = "position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index: 3000;";
+    returnModalOverlay.innerHTML = `
+        <div style="background:#fff; padding:30px; border-radius:10px; width:500px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            <h3 style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;">Return Item</h3>
+            <p id="returnItemName" style="margin-bottom: 15px; color: #333;"></p>
+            <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #0E0465;">Notes for return:</label>
+            <textarea id="returnNote" placeholder="Explain what needs to be changed or provide feedback..." style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"></textarea>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancelReturnBtn" style="padding: 10px 20px; background: #ccc; color: #333; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                <button id="submitReturnBtn" style="padding: 10px 20px; background: #0E0465; color: white; border: none; border-radius: 4px; cursor: pointer;">Return Item</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(returnModalOverlay);
+
+    let pendingReturn = null;
+
+    function openReturnModal(type, id, name) {
+        pendingReturn = { type, id, name };
+        document.getElementById("returnItemName").textContent = `Item: ${name}`;
+        document.getElementById("returnNote").value = "";
+        returnModalOverlay.style.display = "flex";
+    }
+
+    document.getElementById("cancelReturnBtn").addEventListener("click", () => {
+        returnModalOverlay.style.display = "none";
+        pendingReturn = null;
+    });
+
+    document.getElementById("submitReturnBtn").addEventListener("click", () => {
+        const note = document.getElementById("returnNote").value.trim();
+        if (!note) {
+            alert("Please provide a note for the return.");
+            return;
+        }
+
+        fetch("../php/return_item.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type: type, activity_id: id, id: id })
+            body: JSON.stringify({
+                type: pendingReturn.type,
+                id: pendingReturn.id,
+                name: pendingReturn.name,
+                note: note
+            })
         })
         .then(res => res.json())
         .then(result => {
             if (result.success) {
-                alert(`${type} deleted.`);D
+                alert(`Item returned successfully. Student has been notified.`);
+                returnModalOverlay.style.display = "none";
+                pendingReturn = null;
                 loadDashboardData();
             } else {
                 alert("Error: " + result.error);
             }
-        });
-    }
+        })
+        .catch(err => console.error("Error:", err));
+    });
+
+    // Close modal when clicking outside
+    returnModalOverlay.addEventListener("click", (e) => {
+        if (e.target === returnModalOverlay) {
+            returnModalOverlay.style.display = "none";
+            pendingReturn = null;
+        }
+    });
 
     let searchTimeout;
     searchInput.addEventListener("input", (e) => {

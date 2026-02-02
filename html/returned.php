@@ -175,6 +175,74 @@ if ($userRole === 'osas') {
     </section>
   </div>
 
-  <script src="../js/dashboard.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const totalReturnedElem = document.getElementById("totalReturned");
+        const returnedItemsElem = document.getElementById("returnedItems");
+        const searchInput = document.getElementById("searchInput");
+
+        function loadReturnedItems() {
+            fetch("../php/fetch_returned_items.php")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return console.error("API Error:", data.error);
+                    
+                    totalReturnedElem.textContent = data.totalReturned || 0;
+                    renderReturnedItems(data.returnedItems || []);
+                })
+                .catch(err => console.error("Fetch error:", err));
+        }
+
+        function renderReturnedItems(items) {
+            if (items.length === 0) {
+                returnedItemsElem.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 30px;">No returned items.</td></tr>`;
+                return;
+            }
+
+            returnedItemsElem.innerHTML = items.map(item => `
+                <tr>
+                    <td style="width: 45%;">
+                        <div class="activity-info-box">
+                            <div style="overflow:hidden; text-overflow:ellipsis;"><strong>${item.item_name}</strong></div>
+                            <div style="font-size: 12px; color: #666;">${item.type === 'activity' ? 'Activity' : 'Document'}</div>
+                            <small style="color: #999;">Returned: ${new Date(item.timestamp).toLocaleDateString()}</small>
+                        </div>
+                    </td>
+                    <td style="width: 60%;">
+                        <div class="reason-box">
+                            "${item.note}"
+                        </div>
+                    </td>
+                    <td style="width: 15%; text-align: right; padding-right: 20px;">
+                        <button class="reupload-btn" data-type="${item.type}" data-id="${item.item_id}" style="padding: 8px 12px; background: #0E0465; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Reupload</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Add event listeners to reupload buttons
+            document.querySelectorAll(".reupload-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    const type = e.currentTarget.getAttribute("data-type");
+                    if (type === 'activity') {
+                        window.location.href = "create.php";
+                    } else {
+                        window.location.href = "upload.php";
+                    }
+                });
+            });
+        }
+
+        loadReturnedItems();
+
+        let searchTimeout;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Search can be implemented here if needed
+                loadReturnedItems();
+            }, 300);
+        });
+    });
+  </script>
 </body>
 </html>
