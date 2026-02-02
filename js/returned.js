@@ -26,6 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
         returnedItemsElem.innerHTML = items.length ? "" : "<tr><td colspan='3' style='padding:20px; text-align:center;'>No returned items found.</td></tr>";
 
         items.forEach(item => {
+            // Determine type
+            const type = item.doc_count !== undefined ? "activity" : "document";
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="width: 45%;">
@@ -48,16 +51,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td style="width: 15%;">
                     <div class="action-btn-container">
                         <button class="edit-btn" data-id="${item.activity_id}">Edit</button>
-                        <button onclick="reuploadDocs(${item.activity_id})">Reupload</button>
+                        <button class="resubmit-btn" data-id="${item.activity_id}" data-type="${type}">Resubmit</button>
                     </div>
                 </td>
             `;
             returnedItemsElem.appendChild(tr);
 
-            // Attach edit click
+            // Edit button
             tr.querySelector(".edit-btn").addEventListener("click", (e) => {
                 e.stopPropagation();
                 openEditModal(item);
+            });
+
+            // Resubmit button
+            tr.querySelector(".resubmit-btn").addEventListener("click", (e) => {
+                const id = e.target.getAttribute("data-id");
+                const type = e.target.getAttribute("data-type");
+
+                if (!confirm(`Are you sure you want to resubmit this ${type}?`)) return;
+
+                fetch("../php/resubmit_item.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: type, id: id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} resubmitted successfully!`);
+                        e.target.closest("tr").remove();
+                        totalReturnedElem.textContent = parseInt(totalReturnedElem.textContent) - 1;
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(err => alert("Request failed: " + err));
             });
         });
     }
@@ -65,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function openEditModal(item) {
         editModalTitle.textContent = `Edit Activity: ${item.name}`;
 
-        // Pre-fill fields with current activity data
         editModalContent.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <label>Name:</label>
@@ -89,10 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         editModal.style.display = "flex";
 
-        // Cancel button
         document.getElementById("cancelEdit").onclick = () => editModal.style.display = "none";
 
-        // Submit button
         document.getElementById("submitEdit").onclick = () => {
             const updatedData = {
                 id: item.activity_id,
@@ -112,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(result.success){
                     alert("Activity updated!");
                     editModal.style.display = "none";
-                    loadReturnedItems(); // refresh table
+                    loadReturnedItems();
                 } else {
                     alert("Error: " + result.error);
                 }
@@ -123,7 +148,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadReturnedItems();
 });
-
-function reuploadDocs(id) {
-    window.location.href = `upload.php?activity_id=${id}`;
-}

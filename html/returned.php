@@ -42,7 +42,7 @@ if ($userRole === 'osas') {
         text-transform: none;
     }
 
-    /* --- Activity Item Layout --- */
+    /* --- Activity/Document Item Layout --- */
     .activity-info-box { display: flex; flex-direction: column; gap: 6px; }
     .activity-two-col { display: flex; justify-content: flex-start; gap: 30px; }
     .activity-two-col div { font-size: 13px; color: #333; min-width: 150px; }
@@ -60,14 +60,13 @@ if ($userRole === 'osas') {
         line-height: 1.5;
     }
 
-    /* --- Action Buttons (Simplified) --- */
+    /* --- Action Buttons --- */
     .action-btn-container { 
         display: flex; 
         gap: 5px; 
         justify-content: flex-end; 
         padding-right: 10px; 
     }
-    /* No custom button CSS - using browser defaults */
   </style>
 </head>
 <body>
@@ -118,13 +117,13 @@ if ($userRole === 'osas') {
 
         <div class="stat-card">
           <p>Returned Total</p>
-          <p class="stat-number" id="totalReturned">1</p>
+          <p class="stat-number" id="totalReturned">0</p>
         </div>
       </div>
 
       <div class="card combined-card" style="padding: 0; background: transparent; border: none;">
         <div class="table-header-row">
-            <div class="header-item" style="flex: 4.5;">Activity Details</div>
+            <div class="header-item" style="flex: 4.5;">Activity/Document Details</div>
             <div class="header-item" style="flex: 4;">Reason for Return</div>
             <div class="header-item" style="flex: 1.5; text-align: right; padding-right: 20px;">Actions</div>
         </div>
@@ -133,9 +132,8 @@ if ($userRole === 'osas') {
           <div class="activities-content">
             <table class="returned-table">
                 <tbody id="returnedItems">
-    </tbody>
-
-<script src="../js/returned.js"></script>
+                <!-- Returned items will be loaded here by returned.js -->
+                </tbody>
             </table>
           </div>
         </div>
@@ -144,6 +142,7 @@ if ($userRole === 'osas') {
   </div>
 
   <script src="../js/dashboard.js"></script>
+  <script src="../js/returned.js"></script>
 
   <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
     background: rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:2000;">
@@ -152,7 +151,7 @@ if ($userRole === 'osas') {
         <div id="editModalContent" style="line-height:1.6; color:#333;"></div>
         <button id="closeEditModal" style="margin-top:20px; padding:8px 20px; cursor:pointer; background:#0E0465; color:white; border:none; border-radius:4px;">Close</button>
     </div>
-</div>
+  </div>
 
 </body>
 </html>
