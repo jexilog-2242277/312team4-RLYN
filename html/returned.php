@@ -144,5 +144,15 @@ if ($userRole === 'osas') {
   </div>
 
   <script src="../js/dashboard.js"></script>
+
+  <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background: rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:2000;">
+    <div style="background:#fff; padding:20px; border-radius:10px; width:450px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <h3 id="editModalTitle" style="color: #0E0465; margin-bottom: 15px; border-bottom: 2px solid #0E0465;">Edit Activity</h3>
+        <div id="editModalContent" style="line-height:1.6; color:#333;"></div>
+        <button id="closeEditModal" style="margin-top:20px; padding:8px 20px; cursor:pointer; background:#0E0465; color:white; border:none; border-radius:4px;">Close</button>
+    </div>
+</div>
+
 </body>
 </html>
